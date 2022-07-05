@@ -1,17 +1,19 @@
-import { Card, CardContent, CardHeader, Grid, Typography } from '@mui/material'
+import { Stack, Box } from '@mui/material'
 import { Container } from '@mui/system'
 import type { NextPage } from 'next'
-import AllMarkets from '../src/AllMarkets'
-import AllStats from '../src/AllStats'
+import Statistics from '../src/Statistics'
+import Markets from '../src/Markets'
 
 
 const Home: NextPage = () => {
   return (
-    <Container>
-      <Grid container spacing={2}>
-        <AllStats />
-        <AllMarkets />
-      </Grid>
+    <Container  >
+      <Box style={{ background: '#f2f6fc' }}>
+        <Stack spacing={2}>
+          <Statistics />
+          <Markets />
+        </Stack>
+      </Box>
     </Container>
   )
 }
