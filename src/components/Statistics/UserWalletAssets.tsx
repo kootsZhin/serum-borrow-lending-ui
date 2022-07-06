@@ -34,15 +34,13 @@ const UserWalletAssets = () => {
                 let tokenAssets = await connection.getTokenAccountBalance(tokenAddress);
                 const tokenOracle = findWhere(tokensOracle, { symbol: asset.symbol });
                 const reserve = findWhere(config.markets[0].reserves, { asset: asset.symbol });
-                console.log(reserve)
 
                 const reserveConfig = find(allReserves, (r) => r!.pubkey.toString() === reserve.address)!.data;
 
-                console.log(reserveConfig)
                 let tokenValue = tokenAssets.value.uiAmount! * tokenOracle.price;
 
                 totalAssetsValue += tokenValue;
-                totalBorrowingPower += tokenValue * (reserveConfig.config.loanToValueRatio / 100);
+                totalBorrowingPower += tokenValue * (1 - reserveConfig.config.loanToValueRatio / 100);
             }
         }
 
@@ -55,7 +53,7 @@ const UserWalletAssets = () => {
             <Grid container spacing={1} padding={2}>
                 <Grid item xs={12}>
                     <Typography variant='h6'>
-                        My wallet assets (whitelisted)
+                        My wallet assets (whitelisted assets)
                     </Typography>
                 </Grid>
 

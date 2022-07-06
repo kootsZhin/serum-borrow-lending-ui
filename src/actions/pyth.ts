@@ -21,7 +21,6 @@ async function getTokenOracleData(
   }
 
   const assetConfig = findWhere(config.assets, { symbol: oracle.asset })!;
-
   return {
     symbol: oracle.asset,
     reserveAddress: reserve.address,

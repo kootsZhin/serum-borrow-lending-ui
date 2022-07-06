@@ -53,7 +53,7 @@ export default function handler(
                 "assets": [
                     {
                         "asset": "USDC",
-                        "priceAddress": "5SSkXsEKQepHHAewytPVwdej4epN1nxgLVM84L4KXgy7"
+                        "priceAddress": "HovQMDrbAgAYPCmHVSrezcSmkMtXSSUsLDFANExrZh2J"
                     },
                     {
                         "asset": "WSOL",
