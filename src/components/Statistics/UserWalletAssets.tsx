@@ -4,18 +4,8 @@ import { useState, useEffect } from 'react';
 import { PublicKey } from "@solana/web3.js";
 import { getTokensOracleData } from "../../actions/pyth";
 import { getAssociatedTokenAddress } from '@solana/spl-token';
-import { findWhere, initial } from 'underscore';
-
-const initialLTV = [ //TODO: get this from the reserce config
-    {
-        "symbol": "USDC",
-        "ltv": 0.55
-    },
-    {
-        "symbol": "WSOL",
-        "ltv": 0.55
-    }
-]
+import { findWhere, find } from 'underscore';
+import { getReserves } from '../../utils';
 
 const UserWalletAssets = () => {
     const [totalAssets, setTotalAssets] = useState("-");
@@ -33,20 +23,26 @@ const UserWalletAssets = () => {
     const getTotalAssets = async (publicKey: PublicKey) => {
         const config = await (await fetch('http://localhost:3001/api/markets')).json();
         const tokensOracle = await getTokensOracleData(connection, config, config.markets[0].reserves);
+        const allReserves = await getReserves(connection, config, config.markets[0].address);
 
         let totalAssetsValue: number = 0;
         let totalBorrowingPower: number = 0;
 
-        for (const assets of config.assets) {
-            const tokenAddress = await getAssociatedTokenAddress(new PublicKey(assets.mintAddress), publicKey);
+        for (const asset of config.assets) {
+            const tokenAddress = await getAssociatedTokenAddress(new PublicKey(asset.mintAddress), publicKey);
             if (tokenAddress) {
                 let tokenAssets = await connection.getTokenAccountBalance(tokenAddress);
-                const tokenOracle = findWhere(tokensOracle, { symbol: assets.symbol });
+                const tokenOracle = findWhere(tokensOracle, { symbol: asset.symbol });
+                const reserve = findWhere(config.markets[0].reserves, { asset: asset.symbol });
+                console.log(reserve)
+
+                const reserveConfig = find(allReserves, (r) => r!.pubkey.toString() === reserve.address)!.data;
+
+                console.log(reserveConfig)
                 let tokenValue = tokenAssets.value.uiAmount! * tokenOracle.price;
-                let ltvConfig = findWhere(initialLTV, { symbol: assets.symbol });
 
                 totalAssetsValue += tokenValue;
-                totalBorrowingPower += tokenValue * ltvConfig!.ltv;
+                totalBorrowingPower += tokenValue * (reserveConfig.config.loanToValueRatio / 100);
             }
         }
 

@@ -1,6 +1,11 @@
 import { Grid, Typography, Card, CardContent, CardActionArea } from "@mui/material"
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ActionsDialog } from "./ActionsDialog";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react"
+import { findWhere } from "underscore";
+import { PublicKey } from "@solana/web3.js";
+import { getTokensOracleData } from "../../actions/pyth";
+import { getAssociatedTokenAddress } from '@solana/spl-token';
 
 function getMarket(market: string) {
     return market;
@@ -32,14 +37,39 @@ function getUserBalance(market: string) {
 
 const SingleMarketMetrics = ({ market }: { market: string }) => {
     const [open, setOpen] = useState(false);
-
     const handleClickOpen = () => {
         setOpen(true);
     };
-
     const handleClose = () => {
         setOpen(false);
     };
+
+    const [userBalance, setUserBalance] = useState("-");
+    const [userBalanceValue, setUserBalanceValue] = useState("-");
+
+    const { connection } = useConnection();
+    const { publicKey } = useWallet();
+
+    useEffect(() => {
+        if (publicKey) {
+            getUserMetrics(publicKey);
+        }
+    }, [publicKey])
+
+    const getUserMetrics = async (publicKey: PublicKey) => {
+        const config = await (await fetch('http://localhost:3001/api/markets')).json();
+        const asset = findWhere(config.assets, { symbol: market });
+        const tokenAddress = await getAssociatedTokenAddress(new PublicKey(asset.mintAddress), publicKey);
+        const tokensOracle = await getTokensOracleData(connection, config, config.markets[0].reserves);
+
+        if (tokenAddress) {
+            let tokenAssets = await connection.getTokenAccountBalance(tokenAddress);
+            const tokenOracle = findWhere(tokensOracle, { symbol: asset.symbol });
+            setUserBalance(tokenAssets.value.uiAmount!.toFixed(2).toString());
+            setUserBalanceValue((tokenAssets.value.uiAmount! * tokenOracle.price)!.toFixed(2).toString());
+        }
+    }
+
 
     return (
         <Card >
@@ -71,7 +101,7 @@ const SingleMarketMetrics = ({ market }: { market: string }) => {
                             <Typography variant="body2">{getUserBorrowed(market)}</Typography>
                         </Grid>
                         <Grid item xs={1}>
-                            <Typography variant="body2">{getUserBalance(market)}</Typography>
+                            <Typography variant="body2">{userBalance} (${userBalanceValue})</Typography>
                         </Grid>
                     </Grid>
                 </CardContent>
