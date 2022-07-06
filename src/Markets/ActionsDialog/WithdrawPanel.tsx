@@ -1,7 +1,7 @@
 import { Box, Typography, TextField, Stack, Button, Switch, Grid } from '@mui/material';
 
-export function WithdrawPanel(props: { index: number, value: number }) {
-    const { value, index, ...other } = props;
+export function WithdrawPanel(props: { index: number, market: string, value: number }) {
+    const { value, market, index, ...other } = props;
 
     return (
         <div
@@ -14,8 +14,7 @@ export function WithdrawPanel(props: { index: number, value: number }) {
             {value === index && (
                 <Box sx={{ p: 3 }}>
                     <Stack spacing={2}>
-                        <Typography>Withdraw: Token</Typography>
-                        <TextField id="outlined-basic" label="Value" variant="outlined" />
+                        <TextField id="outlined-basic" label={`Enter ${market} Value`} variant="outlined" />
                         <Grid container>
                             <Grid item spacing={3}>
                                 <Typography>Borrow funds</Typography>

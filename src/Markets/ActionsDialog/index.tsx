@@ -10,8 +10,8 @@ function a11yProps(index: number) {
     };
 }
 
-export function ActionsDialog(props: { open: boolean, onClose: () => void }) {
-    const { onClose, open } = props;
+export function ActionsDialog(props: { open: boolean, market: string, onClose: () => void }) {
+    const { onClose, market, open } = props;
 
     const handleClose = () => {
         onClose();
@@ -29,11 +29,11 @@ export function ActionsDialog(props: { open: boolean, onClose: () => void }) {
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <Tabs variant="fullWidth" value={value} onChange={handleChange}>
                     <Tab label="Deposit" {...a11yProps(0)} />
-                    <Tab label="Borrow" {...a11yProps(1)} />
+                    <Tab label="Withdraw" {...a11yProps(1)} />
                 </Tabs>
             </Box>
-            <DepositPanel value={value} index={0} />
-            <WithdrawPanel value={value} index={1} />
+            <DepositPanel value={value} index={0} market={market} />
+            <WithdrawPanel value={value} index={1} market={market} />
         </Dialog>
     );
 }

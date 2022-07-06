@@ -78,6 +78,7 @@ const SingleMarketMetrics = ({ market }: { market: string }) => {
             </CardActionArea>
             <ActionsDialog
                 open={open}
+                market={getMarket(market)}
                 onClose={handleClose}
             />
         </Card >
