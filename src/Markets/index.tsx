@@ -8,9 +8,7 @@ const Markets = () => {
     const [markets, setMarkets] = useState([]);
 
     useEffect(() => {
-        console.log('useEffect')
         if (markets.length === 0) {
-            console.log('Loading markets...');
             getMarkets();
         }
     }, []);
@@ -20,13 +18,11 @@ const Markets = () => {
         const res = await fetch('http://localhost:3001/api/markets');
         const config = await res.json()
 
-
         let markets: any = [];
-
         for (const reserve of config.markets[0].reserves) {
             markets.push(reserve.asset)
         }
-        console.log("markets", markets)
+
         setMarkets(markets);
     }
 
@@ -38,7 +34,7 @@ const Markets = () => {
                     <MetricsHeading />
                     {
                         markets.map((market) => (
-                            <SingleMarketMetrics market={market} />
+                            <SingleMarketMetrics market={market} key={market} />
                         ))
                     }
                 </Stack>

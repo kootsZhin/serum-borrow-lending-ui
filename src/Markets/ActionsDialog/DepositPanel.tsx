@@ -18,8 +18,7 @@ export function DepositPanel(props: { index: number, market: string, value: numb
                         <Button variant="contained">Deposit</Button>
                     </Stack>
                 </Box>
-            )
-            }
+            )}
         </div >
     );
 }

@@ -6,6 +6,7 @@ import Markets from '../src/Markets'
 
 
 const Home: NextPage = () => {
+
   return (
     <Container  >
       <Box style={{ background: '#f2f6fc' }}>

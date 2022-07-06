@@ -18,7 +18,7 @@ export default function handler(
                 },
                 {
                     "name": "Wrapped SOL",
-                    "symbol": "SOL",
+                    "symbol": "WSOL",
                     "decimals": 9,
                     "mintAddress": "So11111111111111111111111111111111111111112",
                 }
@@ -38,7 +38,7 @@ export default function handler(
                             "liquidityFeeReceiverAddress": "GPwirKFawYo7Y8UvCzYBT1zVw6CoEQr8odruzNjbpLMR"
                         },
                         {
-                            "asset": "SOL",
+                            "asset": "WSOL",
                             "address": "Ecxqb6JVFMbYzjHqV31CQsT8oEyhQVDijek57NKh7HaX",
                             "collateralMintAddress": "ACVd31DuzotWTfarju5z54taFgiZsQBL5m2vPYk9xAQc",
                             "collateralSupplyAddress": "F56f28tNNeAkNvxorsP5EvqiJGqYcfj4b4qthLYJX2Xc",
@@ -56,7 +56,7 @@ export default function handler(
                         "priceAddress": "5SSkXsEKQepHHAewytPVwdej4epN1nxgLVM84L4KXgy7"
                     },
                     {
-                        "asset": "SOL",
+                        "asset": "WSOL",
                         "priceAddress": "J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix"
                     }
                 ]

@@ -16,18 +16,17 @@ export function WithdrawPanel(props: { index: number, market: string, value: num
                     <Stack spacing={2}>
                         <TextField id="outlined-basic" label={`Enter ${market} Value`} variant="outlined" />
                         <Grid container>
-                            <Grid item spacing={3}>
+                            <Grid item >
                                 <Typography>Borrow funds</Typography>
                             </Grid>
-                            <Grid item spacing={6}>
+                            <Grid item >
                                 <Switch />
                             </Grid>
                         </Grid>
                         <Button variant="contained">Withdraw</Button>
                     </Stack>
                 </Box>
-            )
-            }
+            )}
         </div >
     );
 }

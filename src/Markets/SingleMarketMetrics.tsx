@@ -42,7 +42,7 @@ const SingleMarketMetrics = ({ market }: { market: string }) => {
     };
 
     return (
-        <Card>
+        <Card >
             <CardActionArea onClick={handleClickOpen}>
                 <CardContent>
                     <Grid container columns={9}>
