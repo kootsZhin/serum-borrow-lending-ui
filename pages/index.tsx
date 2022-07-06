@@ -1,8 +1,8 @@
 import { Stack, Box } from '@mui/material'
 import { Container } from '@mui/system'
 import type { NextPage } from 'next'
-import Statistics from '../src/Statistics'
-import Markets from '../src/Markets'
+import Statistics from '../src/components/Statistics'
+import Markets from '../src/components/Markets'
 
 
 const Home: NextPage = () => {

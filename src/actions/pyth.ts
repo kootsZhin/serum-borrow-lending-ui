@@ -2,7 +2,7 @@ import { findWhere } from 'underscore';
 import { parsePriceData } from '@pythnetwork/client';
 import { Connection, PublicKey } from '@solana/web3.js';
 import BigNumber from 'bignumber.js';
-import { Config, OracleAsset, Reserve } from '../src/global';
+import { Config, OracleAsset, Reserve } from '../global';
 
 const NULL_ORACLE = 'nu11111111111111111111111111111111111111111';
 

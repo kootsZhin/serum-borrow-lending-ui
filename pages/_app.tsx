@@ -22,7 +22,7 @@ require('@solana/wallet-adapter-react-ui/styles.css');
 
 import '../styles/globals.css'
 import type { AppProps } from 'next/app'
-import Header from '../src/Header'
+import Header from '../src/components/Header'
 
 function MyApp({ Component, pageProps }: AppProps) {
 
