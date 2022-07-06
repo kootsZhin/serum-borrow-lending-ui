@@ -17,7 +17,7 @@ const Markets = () => {
 
     async function getMarkets() {
 
-        const res = await fetch('http://localhost:3002/api/markets');
+        const res = await fetch('http://localhost:3001/api/markets');
         const config = await res.json()
 
 

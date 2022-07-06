@@ -1,5 +1,6 @@
 import { Grid, Typography, Card, CardContent, CardActionArea } from "@mui/material"
 import { useState } from "react";
+import { ActionsDialog } from "./ActionsDialog";
 
 function getMarket(market: string) {
     return market;
@@ -30,9 +31,19 @@ function getUserBalance(market: string) {
 }
 
 const SingleMarketMetrics = ({ market }: { market: string }) => {
+    const [open, setOpen] = useState(false);
+
+    const handleClickOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+    };
+
     return (
         <Card>
-            <CardActionArea>
+            <CardActionArea onClick={handleClickOpen}>
                 <CardContent>
                     <Grid container columns={9}>
                         <Grid item xs={1}>
@@ -65,6 +76,10 @@ const SingleMarketMetrics = ({ market }: { market: string }) => {
                     </Grid>
                 </CardContent>
             </CardActionArea>
+            <ActionsDialog
+                open={open}
+                onClose={handleClose}
+            />
         </Card >
     )
 }
