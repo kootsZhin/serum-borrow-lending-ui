@@ -1,12 +1,35 @@
-import { Card, CardContent, Grid, Stack, Typography } from '@mui/material'
+import { Card, CardContent, Stack, Typography } from '@mui/material'
 import MetricsHeading from './MetricsHeading'
 import SingleMarketMetrics from './SingleMarketMetrics'
+import { useState, useEffect } from 'react'
 
-function getMarkets() {
-    return ["SOL", "USDC"];
-}
 
 const Markets = () => {
+    const [markets, setMarkets] = useState([]);
+
+    useEffect(() => {
+        console.log('useEffect')
+        if (markets.length === 0) {
+            console.log('Loading markets...');
+            getMarkets();
+        }
+    }, []);
+
+    async function getMarkets() {
+
+        const res = await fetch('http://localhost:3002/api/markets');
+        const config = await res.json()
+
+
+        let markets: any = [];
+
+        for (const reserve of config.markets[0].reserves) {
+            markets.push(reserve.asset)
+        }
+        console.log("markets", markets)
+        setMarkets(markets);
+    }
+
     return (
         <Card>
             <CardContent>
@@ -14,7 +37,7 @@ const Markets = () => {
                 <Stack spacing={2}>
                     <MetricsHeading />
                     {
-                        getMarkets().map((market) => (
+                        markets.map((market) => (
                             <SingleMarketMetrics market={market} />
                         ))
                     }
