@@ -55,7 +55,7 @@ export default function handler(
                 "assets": [
                     {
                         "asset": "USDC",
-                        "priceAddress": "5SSkXsEKQepHHAewytPVwdej4epN1nxgLVM84L4KXgy7"
+                        "priceAddress": "HovQMDrbAgAYPCmHVSrezcSmkMtXSSUsLDFANExrZh2J" // 5SSkXsEKQepHHAewytPVwdej4epN1nxgLVM84L4KXgy7 using BTC oracle for better stability
                     },
                     {
                         "asset": "WSOL",
@@ -66,3 +66,4 @@ export default function handler(
         }
     )
 }
+

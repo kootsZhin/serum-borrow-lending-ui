@@ -55,7 +55,7 @@ export function DepositPanel(props: { index: number, market: string, value: numb
         );
 
         const liquidityAddress = await getAssociatedTokenAddress(new PublicKey(assetConfig.mintAddress), publicKey);
-        console.log(oracleConfig.priceAddress)
+
         instructions.push(refreshReserveInstruction(
             new PublicKey(reserveConfig!.address),
             new PublicKey(config.programID),

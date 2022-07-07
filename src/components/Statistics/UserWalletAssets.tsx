@@ -23,23 +23,30 @@ const UserWalletAssets = () => {
     const getTotalAssets = async (publicKey: PublicKey) => {
         const config = await (await fetch('http://localhost:3001/api/markets')).json();
         const tokensOracle = await getTokensOracleData(connection, config, config.markets[0].reserves);
-        const allReserves = await getReserves(connection, config, config.markets[0].address);
-        console.log(allReserves)
-        let totalAssetsValue: number = 0;
-        let totalBorrowingPower: number = 0;
+        const allReserves = await getReserves(connection, config, (config.markets[0].address));
+
+        let totalAssetsValue = 0;
+        let totalBorrowingPower = 0;
 
         for (const asset of config.assets) {
-            console.log(config.assets)
+
             const tokenAddress = await getAssociatedTokenAddress(new PublicKey(asset.mintAddress), publicKey);
-            console.log(asset.mintAddress)
+
             if (tokenAddress) {
-                let tokenAssets = await connection.getTokenAccountBalance(tokenAddress);
+                let tokenAssetsBalance: number;
+
+                try {
+                    tokenAssetsBalance = await (await connection.getTokenAccountBalance(tokenAddress)).value.uiAmount!;
+                } catch (error: unknown) {
+                    tokenAssetsBalance = 0;
+                }
+
                 const tokenOracle = findWhere(tokensOracle, { symbol: asset.symbol });
                 const reserve = findWhere(config.markets[0].reserves, { asset: asset.symbol });
 
                 const reserveConfig = find(allReserves, (r) => r!.pubkey.toString() === reserve.address)!.data;
 
-                let tokenValue = tokenAssets.value.uiAmount! * tokenOracle.price;
+                let tokenValue = tokenAssetsBalance * tokenOracle.price;
 
                 totalAssetsValue += tokenValue;
                 totalBorrowingPower += tokenValue * (1 - reserveConfig.config.loanToValueRatio / 100);
