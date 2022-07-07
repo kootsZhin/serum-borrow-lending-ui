@@ -1,5 +1,5 @@
 import { Keypair, SystemProgram, Transaction } from '@solana/web3.js';
-import { Box, TextField, Stack, Button } from '@mui/material';
+import { Box, TextField, Stack, Button, Grid, Typography, Switch } from '@mui/material';
 import { useConnection, useWallet } from "@solana/wallet-adapter-react"
 import { WalletNotConnectedError } from '@solana/wallet-adapter-base';
 import {
@@ -95,6 +95,14 @@ export function DepositPanel(props: { index: number, market: string, value: numb
                 <Box sx={{ p: 3 }}>
                     <Stack spacing={2}>
                         <TextField id="outlined-basic" label={`Enter ${market} Value`} variant="outlined" onChange={(event) => { setDepositAmount(Number(event.target.value)) }} />
+                        <Grid container>
+                            <Grid item >
+                                <Typography>Repay funds</Typography>
+                            </Grid>
+                            <Grid item >
+                                <Switch />
+                            </Grid>
+                        </Grid>
                         <Button variant="contained" onClick={onClick}>Deposit</Button>
                     </Stack>
                 </Box>

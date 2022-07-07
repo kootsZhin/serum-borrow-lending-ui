@@ -65,7 +65,7 @@ const UserWalletAssets = () => {
 
                 <Grid item xs={6}>
                     <Typography variant="body2">
-                        Borrowing Power:
+                        Total Borrowing Power:
                     </Typography>
                 </Grid>
 
