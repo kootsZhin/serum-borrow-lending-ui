@@ -86,7 +86,6 @@ const SingleMarketMetrics = ({ market }: { market: string }) => {
         const tokensOracle = await getTokensOracleData(connection, config, config.markets[0].reserves);
         const allReserves: any = await getReserves(connection, config, config.markets[0].address);
 
-
         const tokenOracle = findWhere(tokensOracle, { symbol: asset.symbol });
         const reserve = findWhere(config.markets[0].reserves, { asset: asset.symbol });
         const reserveConfig = find(allReserves, (r) => r!.pubkey.toString() === reserve.address)!.data;

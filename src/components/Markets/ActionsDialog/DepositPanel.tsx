@@ -14,7 +14,8 @@ import { useCallback, useState } from 'react';
 import { findWhere } from 'underscore';
 import { PublicKey } from '@solana/web3.js';
 
-import { depositReserveLiquidityInstruction, refreshReserveInstruction } from '../../../models/instructions';
+import { depositReserveLiquidityInstruction, refreshReserveInstruction, depositReserveLiquidityAndObligationCollateralInstruction, initObligationInstruction } from '../../../models/instructions';
+import { OBLIGATION_SIZE, parseObligation } from '../../../models';
 
 export function DepositPanel(props: { index: number, market: string, value: number }) {
     const { value, market, index, ...other } = props;
@@ -33,15 +34,15 @@ export function DepositPanel(props: { index: number, market: string, value: numb
         const oracleConfig = findWhere(config.oracles.assets, { asset: market });
 
         // Get or create the token account for collateral token
-        const collateralToken = await getAssociatedTokenAddress(new PublicKey(reserveConfig!.collateralMintAddress), publicKey);
+        const sourceCollateral = await getAssociatedTokenAddress(new PublicKey(reserveConfig!.collateralMintAddress), publicKey);
         let collateralAccount: Account;
         try {
-            collateralAccount = await getAccount(connection, collateralToken);
+            collateralAccount = await getAccount(connection, sourceCollateral);
         } catch (error: unknown) {
             if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
                 instructions.push(createAssociatedTokenAccountInstruction(
                     publicKey,
-                    collateralToken,
+                    sourceCollateral,
                     publicKey,
                     new PublicKey(reserveConfig!.collateralMintAddress
                     )
@@ -54,25 +55,46 @@ export function DepositPanel(props: { index: number, market: string, value: numb
             new PublicKey(config.programID)
         );
 
-        const liquidityAddress = await getAssociatedTokenAddress(new PublicKey(assetConfig.mintAddress), publicKey);
+        const sourceLiquidity = await getAssociatedTokenAddress(new PublicKey(assetConfig.mintAddress), publicKey);
 
-        instructions.push(refreshReserveInstruction(
-            new PublicKey(reserveConfig!.address),
-            new PublicKey(config.programID),
-            new PublicKey(oracleConfig.priceAddress)
-        ))
+        const seed = config.markets[0].address.slice(0, 32);
+        const obligationAccount = await PublicKey.createWithSeed(publicKey, seed, new PublicKey(config.programID));
 
-        // deposit
-        instructions.push(depositReserveLiquidityInstruction(
+        if (!(await connection.getAccountInfo(obligationAccount))) {
+            instructions.push(SystemProgram.createAccountWithSeed(
+                {
+                    fromPubkey: publicKey,
+                    newAccountPubkey: obligationAccount,
+                    basePubkey: publicKey,
+                    seed: seed,
+                    lamports: (await connection.getMinimumBalanceForRentExemption(OBLIGATION_SIZE)),
+                    space: OBLIGATION_SIZE,
+                    programId: new PublicKey(config.programID),
+                }
+            ));
+
+            instructions.push(initObligationInstruction(
+                obligationAccount,
+                new PublicKey(config.programID),
+                new PublicKey(config.markets[0].address),
+                publicKey
+            ))
+        }
+
+        instructions.push(depositReserveLiquidityAndObligationCollateralInstruction(
             depositAmount * 10 ** assetConfig.decimals,
             new PublicKey(config.programID),
-            liquidityAddress,
-            collateralToken,
+            sourceLiquidity,
+            sourceCollateral,
             new PublicKey(reserveConfig!.address),
             new PublicKey(reserveConfig!.liquidityAddress),
             new PublicKey(reserveConfig!.collateralMintAddress),
             new PublicKey(config.markets[0].address),
             authority,
+            new PublicKey(reserveConfig!.collateralSupplyAddress), // TODO: replace with destination collateral address
+            obligationAccount, // TODO: replace with obligagtion address
+            publicKey,
+            new PublicKey(oracleConfig.priceAddress),
             publicKey
         ));
 
