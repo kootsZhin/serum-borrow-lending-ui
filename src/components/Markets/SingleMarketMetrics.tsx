@@ -83,9 +83,6 @@ const SingleMarketMetrics = ({ market }: { market: string }) => {
                 const normalizedFactor = currentUtilization / optimalUtilization;
                 const optimalBorrowRate = reserveConfig.config.optimalBorrowRate / 100;
                 const minBorrowRate = reserveConfig.config.minBorrowRate / 100;
-                console.log("normalizedFactor", normalizedFactor)
-                console.log("optimalBorrowRate", optimalBorrowRate)
-                console.log("minBorrowRate", minBorrowRate)
                 borrowAPR =
                     normalizedFactor * (optimalBorrowRate - minBorrowRate) + minBorrowRate;
             } else {
