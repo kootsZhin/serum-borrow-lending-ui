@@ -14,7 +14,7 @@ import { useCallback, useState } from 'react';
 import { findWhere, find } from 'underscore';
 import { PublicKey } from '@solana/web3.js';
 
-import { depositReserveLiquidityAndObligationCollateralInstruction, initObligationInstruction, refreshReserveInstruction, refreshObligationInstruction } from '../../../models/instructions';
+import { depositReserveLiquidityAndObligationCollateralInstruction, borrowObligationLiquidityInstruction, initObligationInstruction, refreshReserveInstruction, refreshObligationInstruction } from '../../../models/instructions';
 import { OBLIGATION_SIZE } from '../../../models';
 import { BASEURI } from '../../../constants';
 import { getReserves, getObligations } from '../../../utils';
@@ -28,80 +28,159 @@ export function WithdrawPanel(props: { index: number, market: string, value: num
     const { publicKey, sendTransaction } = useWallet();
 
     const [withdrawAmount, setWithdrawAmount] = useState(0);
+    const [borrowChecked, setBorrowChecked] = useState(false);
 
     const onClick = useCallback(async () => {
         if (!publicKey) throw new WalletNotConnectedError();
-        const config = await (await fetch(`${BASEURI}/api/markets`)).json();
-        const instructions = [];
 
-        const assetConfig = findWhere(config.assets, { symbol: market });
-        const reserveConfig = findWhere(config.markets[0].reserves, { asset: market });
-        const oracleConfig = findWhere(config.oracles.assets, { asset: market });
+        if (!borrowChecked) {
+            const config = await (await fetch(`${BASEURI}/api/markets`)).json();
+            const instructions = [];
 
-        const allObligation = await getObligations(connection, config, config.markets[0].address);
-        const userObligation = find(allObligation, (r) => r!.data.owner.toString() === publicKey.toString());
+            const assetConfig = findWhere(config.assets, { symbol: market });
+            const reserveConfig = findWhere(config.markets[0].reserves, { asset: market });
+            const oracleConfig = findWhere(config.oracles.assets, { asset: market });
 
-        let userDepositedReserves: PublicKey[] = [];
-        let userBorrowedReserves: PublicKey[] = [];
-        if (userObligation) {
-            userObligation.data.deposits.forEach((deposit) => { userDepositedReserves.push(deposit.depositReserve) });
-            userObligation.data.borrows.forEach((borrow) => { userBorrowedReserves.push(borrow.borrowReserve) });
+            const allObligation = await getObligations(connection, config, config.markets[0].address);
+            const userObligation = find(allObligation, (r) => r!.data.owner.toString() === publicKey.toString());
+
+            let userDepositedReserves: PublicKey[] = [];
+            let userBorrowedReserves: PublicKey[] = [];
+            if (userObligation) {
+                userObligation.data.deposits.forEach((deposit) => { userDepositedReserves.push(deposit.depositReserve) });
+                userObligation.data.borrows.forEach((borrow) => { userBorrowedReserves.push(borrow.borrowReserve) });
+            }
+
+            const userCollateralAccount = await getAssociatedTokenAddress(new PublicKey(reserveConfig.collateralMintAddress), publicKey);
+            const userLiquidityAccount = await getAssociatedTokenAddress(new PublicKey(assetConfig.mintAddress), publicKey);
+
+            const allReserves: any = await getReserves(connection, config, config.markets[0].address);
+            const reserveParsed = find(allReserves, (r) => r!.pubkey.toString() === reserveConfig.address)!.data;
+
+            const [authority] = await PublicKey.findProgramAddress(
+                [new PublicKey(config.markets[0].address).toBuffer()],
+                new PublicKey(config.programID)
+            );
+
+            instructions.push(refreshReserveInstruction(
+                new PublicKey(reserveConfig.address),
+                new PublicKey(config.programID),
+                new PublicKey(oracleConfig.priceAddress)
+            ))
+
+            instructions.push(refreshObligationInstruction(
+                userObligation.pubkey,
+                new PublicKey(config.programID),
+                userDepositedReserves,
+                userBorrowedReserves,
+            ))
+
+
+            const totalBorrowWads = reserveParsed.liquidity.borrowedAmountWads;
+            const totalLiquidityWads = (new BigNumber(reserveParsed.liquidity.availableAmount)).multipliedBy(WAD);
+            const totalDepositWads = totalBorrowWads.plus(totalLiquidityWads);
+            const cTokenExchangeRate = totalDepositWads.dividedBy(new BigNumber(reserveParsed.collateral.mintTotalSupply)).dividedBy(WAD);
+
+            instructions.push(withdrawObligationCollateralAndRedeemReserveLiquidity(
+                Number((new BigNumber(withdrawAmount * 10 ** assetConfig.decimals))
+                    .dividedBy(cTokenExchangeRate)
+                    .integerValue(BigNumber.ROUND_FLOOR).toString()),
+                new PublicKey(config.programID),
+                new PublicKey(reserveConfig.collateralSupplyAddress),
+                userCollateralAccount,
+                new PublicKey(reserveConfig.address),
+                userObligation.pubkey,
+                new PublicKey(config.markets[0].address),
+                authority,
+                userLiquidityAccount,
+                new PublicKey(reserveConfig.collateralMintAddress),
+                new PublicKey(reserveConfig.liquidityAddress),
+                publicKey,
+                publicKey
+            ))
+
+            const tx = new Transaction().add(...instructions);
+
+            const signature = await sendTransaction(tx, connection);
+            await connection.confirmTransaction(signature, "processed");
         }
 
-        const userCollateralAccount = await getAssociatedTokenAddress(new PublicKey(reserveConfig.collateralMintAddress), publicKey);
-        const userLiquidityAccount = await getAssociatedTokenAddress(new PublicKey(assetConfig.mintAddress), publicKey);
+        else {
+            console.log("borrow");
+            console.log("borrow");
+            const config = await (await fetch(`${BASEURI}/api/markets`)).json();
+            const instructions = [];
 
-        const allReserves: any = await getReserves(connection, config, config.markets[0].address);
-        const reserveParsed = find(allReserves, (r) => r!.pubkey.toString() === reserveConfig.address)!.data;
+            const assetConfig = findWhere(config.assets, { symbol: market });
+            const reserveConfig = findWhere(config.markets[0].reserves, { asset: market });
+            const oracleConfig = findWhere(config.oracles.assets, { asset: market });
 
-        const [authority] = await PublicKey.findProgramAddress(
-            [new PublicKey(config.markets[0].address).toBuffer()],
-            new PublicKey(config.programID)
-        );
+            const allObligation = await getObligations(connection, config, config.markets[0].address);
+            const userObligation = find(allObligation, (r) => r!.data.owner.toString() === publicKey.toString());
 
-        instructions.push(refreshReserveInstruction(
-            new PublicKey(reserveConfig.address),
-            new PublicKey(config.programID),
-            new PublicKey(oracleConfig.priceAddress)
-        ))
+            let userDepositedReserves: PublicKey[] = [];
+            let userBorrowedReserves: PublicKey[] = [];
+            if (userObligation) {
+                userObligation.data.deposits.forEach((deposit) => { userDepositedReserves.push(deposit.depositReserve) });
+                userObligation.data.borrows.forEach((borrow) => { userBorrowedReserves.push(borrow.borrowReserve) });
+            }
 
-        instructions.push(refreshObligationInstruction(
-            userObligation.pubkey,
-            new PublicKey(config.programID),
-            userDepositedReserves,
-            userBorrowedReserves,
-        ))
+            const userLiquidityAccount = await getAssociatedTokenAddress(new PublicKey(assetConfig.mintAddress), publicKey);
 
+            try {
+                await getAccount(connection, userLiquidityAccount);
+            } catch (error: unknown) {
+                if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
+                    instructions.push(createAssociatedTokenAccountInstruction(
+                        publicKey,
+                        userLiquidityAccount,
+                        publicKey,
+                        new PublicKey(assetConfig.mintAddress)
+                    ));
+                }
+            }
 
-        const totalBorrowWads = reserveParsed.liquidity.borrowedAmountWads;
-        const totalLiquidityWads = (new BigNumber(reserveParsed.liquidity.availableAmount)).multipliedBy(WAD);
-        const totalDepositWads = totalBorrowWads.plus(totalLiquidityWads);
-        const cTokenExchangeRate = totalDepositWads.dividedBy(new BigNumber(reserveParsed.collateral.mintTotalSupply)).dividedBy(WAD);
+            const allReserves: any = await getReserves(connection, config, config.markets[0].address);
+            const reserveParsed = find(allReserves, (r) => r!.pubkey.toString() === reserveConfig.address)!.data;
 
-        instructions.push(withdrawObligationCollateralAndRedeemReserveLiquidity(
-            Number((new BigNumber(withdrawAmount * 10 ** assetConfig.decimals))
-                .dividedBy(cTokenExchangeRate)
-                .integerValue(BigNumber.ROUND_FLOOR).toString()),
-            new PublicKey(config.programID),
-            new PublicKey(reserveConfig.collateralSupplyAddress),
-            userCollateralAccount,
-            new PublicKey(reserveConfig.address),
-            userObligation.pubkey,
-            new PublicKey(config.markets[0].address),
-            authority,
-            userLiquidityAccount,
-            new PublicKey(reserveConfig.collateralMintAddress),
-            new PublicKey(reserveConfig.liquidityAddress),
-            publicKey,
-            publicKey
-        ))
+            const [authority] = await PublicKey.findProgramAddress(
+                [new PublicKey(config.markets[0].address).toBuffer()],
+                new PublicKey(config.programID)
+            );
 
-        const tx = new Transaction().add(...instructions);
+            instructions.push(refreshReserveInstruction(
+                new PublicKey(reserveConfig.address),
+                new PublicKey(config.programID),
+                new PublicKey(oracleConfig.priceAddress)
+            ))
 
-        const signature = await sendTransaction(tx, connection);
-        await connection.confirmTransaction(signature, "processed");
+            instructions.push(refreshObligationInstruction(
+                userObligation.pubkey,
+                new PublicKey(config.programID),
+                userDepositedReserves,
+                userBorrowedReserves,
+            ))
 
-    }, [withdrawAmount, publicKey, sendTransaction, connection]);
+            instructions.push(borrowObligationLiquidityInstruction(
+                withdrawAmount * 10 ** assetConfig.decimals,
+                new PublicKey(config.programID),
+                new PublicKey(reserveConfig.liquidityAddress),
+                userLiquidityAccount,
+                new PublicKey(reserveConfig.address),
+                new PublicKey(reserveConfig.liquidityFeeReceiverAddress),
+                userObligation.pubkey,
+                new PublicKey(config.markets[0].address),
+                authority,
+                publicKey
+            ))
+
+            const tx = new Transaction().add(...instructions);
+
+            const signature = await sendTransaction(tx, connection);
+            await connection.confirmTransaction(signature, "processed");
+        }
+
+    }, [withdrawAmount, borrowChecked, publicKey, sendTransaction, connection]);
 
     return (
         <div
@@ -120,7 +199,7 @@ export function WithdrawPanel(props: { index: number, market: string, value: num
                                 <Typography>Borrow funds</Typography>
                             </Grid>
                             <Grid item >
-                                <Switch />
+                                <Switch checked={borrowChecked} onChange={(e) => { setBorrowChecked(e.target.checked) }} />
                             </Grid>
                         </Grid>
                         <Button variant="contained" onClick={onClick}>Withdraw</Button>

@@ -24,10 +24,10 @@ const MetricsHeading = () => {
                         <Typography variant="body1">Borrow APR</Typography>
                     </Grid>
                     <Grid item xs={1}>
-                        <Typography variant="body1">My deposited</Typography>
+                        <Typography variant="body1">My deposit</Typography>
                     </Grid>
                     <Grid item xs={1}>
-                        <Typography variant="body1">My borrowed</Typography>
+                        <Typography variant="body1">My borrow</Typography>
                     </Grid>
                     <Grid item xs={1}>
                         <Typography variant="body1">My balance</Typography>
