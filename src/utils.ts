@@ -22,7 +22,7 @@ export async function getReserves(connection: Connection, config: Config, lendin
     return resp.map((account) => parseReserve(account.pubkey, account.account));
 }
 
-export async function getObligation(connection: Connection, config: Config, lendingMarket: any) {
+export async function getObligations(connection: Connection, config: Config, lendingMarket: any) {
     const resp = await connection.getProgramAccounts(new PublicKey(config.programID), {
         commitment: connection.commitment,
         filters: [

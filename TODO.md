@@ -1,3 +1,7 @@
 - share state in the whole app (e.g. userDeposit)
 - share config in the whole app
 - combining depositing assets and collateral
+- use depositreserve&collateral withdrawcollateral&redeemcollateral
+- check if obligation exists, if not create it
+- assuming only one lending market (pool) now
+- change better variable names

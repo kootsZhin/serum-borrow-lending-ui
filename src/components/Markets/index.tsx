@@ -2,7 +2,7 @@ import { Card, CardContent, Stack, Typography } from '@mui/material'
 import MetricsHeading from './MetricsHeading'
 import SingleMarketMetrics from './SingleMarketMetrics'
 import { useState, useEffect } from 'react'
-
+import { BASEURI } from '../../constants'
 
 const Markets = () => {
     const [markets, setMarkets] = useState([]);
@@ -15,7 +15,7 @@ const Markets = () => {
 
     async function getMarkets() {
 
-        const res = await fetch('http://localhost:3001/api/markets');
+        const res = await fetch(`${BASEURI}/api/markets`);
         const config = await res.json()
 
         let markets: any = [];
@@ -29,8 +29,8 @@ const Markets = () => {
     return (
         <Card>
             <CardContent>
-                <Typography variant='h6'>All Markets</Typography>
                 <Stack spacing={2}>
+                    <Typography variant='h6'>All Markets</Typography>
                     <MetricsHeading />
                     {
                         markets.map((market) => (
