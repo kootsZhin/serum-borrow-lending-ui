@@ -14,8 +14,9 @@ import { useCallback, useState } from 'react';
 import { findWhere } from 'underscore';
 import { PublicKey } from '@solana/web3.js';
 
-import { depositReserveLiquidityInstruction, refreshReserveInstruction, depositReserveLiquidityAndObligationCollateralInstruction, initObligationInstruction } from '../../../models/instructions';
-import { OBLIGATION_SIZE, parseObligation } from '../../../models';
+import { depositReserveLiquidityAndObligationCollateralInstruction, initObligationInstruction } from '../../../models/instructions';
+import { OBLIGATION_SIZE } from '../../../models';
+import { BASEURI } from '../../../constants';
 
 export function DepositPanel(props: { index: number, market: string, value: number }) {
     const { value, market, index, ...other } = props;
@@ -26,7 +27,7 @@ export function DepositPanel(props: { index: number, market: string, value: numb
 
     const onClick = useCallback(async () => {
         if (!publicKey) throw new WalletNotConnectedError();
-        const config = await (await fetch('http://localhost:3001/api/markets')).json();
+        const config = await (await fetch(`${BASEURI}/api/markets`)).json();
         const instructions = [];
 
         const assetConfig = findWhere(config.assets, { symbol: market });

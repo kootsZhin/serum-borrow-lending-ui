@@ -27,7 +27,6 @@ export const depositReserveLiquidityAndObligationCollateralInstruction = (
     pythOracle: PublicKey,
     transferAuthority: PublicKey,
 ): TransactionInstruction => {
-    console.log("hi")
     const data = Buffer.alloc(DataLayout.span);
     DataLayout.encode(
         {

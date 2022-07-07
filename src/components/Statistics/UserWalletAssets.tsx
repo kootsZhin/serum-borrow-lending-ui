@@ -6,6 +6,7 @@ import { getTokensOracleData } from "../../actions/pyth";
 import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { findWhere, find } from 'underscore';
 import { getReserves } from '../../utils';
+import { BASEURI } from '../../constants';
 
 const UserWalletAssets = () => {
     const [totalAssets, setTotalAssets] = useState("-");
@@ -21,7 +22,7 @@ const UserWalletAssets = () => {
     }, [publicKey])
 
     const getTotalAssets = async (publicKey: PublicKey) => {
-        const config = await (await fetch('http://localhost:3001/api/markets')).json();
+        const config = await (await fetch(`${BASEURI}/api/markets`)).json();
         const tokensOracle = await getTokensOracleData(connection, config, config.markets[0].reserves);
         const allReserves = await getReserves(connection, config, (config.markets[0].address));
 
@@ -33,7 +34,7 @@ const UserWalletAssets = () => {
             const tokenAddress = await getAssociatedTokenAddress(new PublicKey(asset.mintAddress), publicKey);
 
             if (tokenAddress) {
-                let tokenAssetsBalance: number;
+                let tokenAssetsBalance = 0
 
                 try {
                     tokenAssetsBalance = await (await connection.getTokenAccountBalance(tokenAddress)).value.uiAmount!;
