@@ -25,141 +25,88 @@ export function DepositPanel(props: { index: number, market: string, value: numb
     const { publicKey, sendTransaction } = useWallet();
 
     const [depositAmount, setDepositAmount] = useState(0);
-    const [repayChecked, setRepayChecked] = useState(false);
 
     const onClick = useCallback(async () => {
         if (!publicKey) throw new WalletNotConnectedError();
 
-        if (!repayChecked) {
-            const config = await (await fetch(`${BASEURI}/api/markets`)).json();
-            const instructions = [];
 
-            const assetConfig = findWhere(config.assets, { symbol: market });
-            const reserveConfig = findWhere(config.markets[0].reserves, { asset: market });
-            const oracleConfig = findWhere(config.oracles.assets, { asset: market });
+        const config = await (await fetch(`${BASEURI}/api/markets`)).json();
+        const instructions = [];
 
-            // Get or create the token account for collateral token
-            const sourceCollateral = await getAssociatedTokenAddress(new PublicKey(reserveConfig!.collateralMintAddress), publicKey);
+        const assetConfig = findWhere(config.assets, { symbol: market });
+        const reserveConfig = findWhere(config.markets[0].reserves, { asset: market });
+        const oracleConfig = findWhere(config.oracles.assets, { asset: market });
 
-            try {
-                await getAccount(connection, sourceCollateral);
-            } catch (error: unknown) {
-                if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
-                    instructions.push(createAssociatedTokenAccountInstruction(
-                        publicKey,
-                        sourceCollateral,
-                        publicKey,
-                        new PublicKey(reserveConfig!.collateralMintAddress)
-                    ));
-                }
-            }
+        // Get or create the token account for collateral token
+        const sourceCollateral = await getAssociatedTokenAddress(new PublicKey(reserveConfig!.collateralMintAddress), publicKey);
 
-            const [authority] = await PublicKey.findProgramAddress(
-                [new PublicKey(config.markets[0].address).toBuffer()],
-                new PublicKey(config.programID)
-            );
-
-            const sourceLiquidity = await getAssociatedTokenAddress(new PublicKey(assetConfig.mintAddress), publicKey);
-
-            const seed = config.markets[0].address.slice(0, 32);
-            const obligationAccount = await PublicKey.createWithSeed(publicKey, seed, new PublicKey(config.programID));
-
-            if (!(await connection.getAccountInfo(obligationAccount))) {
-                instructions.push(SystemProgram.createAccountWithSeed(
-                    {
-                        fromPubkey: publicKey,
-                        newAccountPubkey: obligationAccount,
-                        basePubkey: publicKey,
-                        seed: seed,
-                        lamports: (await connection.getMinimumBalanceForRentExemption(OBLIGATION_SIZE)),
-                        space: OBLIGATION_SIZE,
-                        programId: new PublicKey(config.programID),
-                    }
+        try {
+            await getAccount(connection, sourceCollateral);
+        } catch (error: unknown) {
+            if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
+                instructions.push(createAssociatedTokenAccountInstruction(
+                    publicKey,
+                    sourceCollateral,
+                    publicKey,
+                    new PublicKey(reserveConfig!.collateralMintAddress)
                 ));
-
-                instructions.push(initObligationInstruction(
-                    obligationAccount,
-                    new PublicKey(config.programID),
-                    new PublicKey(config.markets[0].address),
-                    publicKey
-                ))
             }
+        }
 
-            instructions.push(depositReserveLiquidityAndObligationCollateralInstruction(
-                depositAmount * 10 ** assetConfig.decimals,
-                new PublicKey(config.programID),
-                sourceLiquidity,
-                sourceCollateral,
-                new PublicKey(reserveConfig!.address),
-                new PublicKey(reserveConfig!.liquidityAddress),
-                new PublicKey(reserveConfig!.collateralMintAddress),
-                new PublicKey(config.markets[0].address),
-                authority,
-                new PublicKey(reserveConfig!.collateralSupplyAddress), // TODO: replace with destination collateral address
-                obligationAccount, // TODO: replace with obligagtion address
-                publicKey,
-                new PublicKey(oracleConfig.priceAddress),
-                publicKey
+        const [authority] = await PublicKey.findProgramAddress(
+            [new PublicKey(config.markets[0].address).toBuffer()],
+            new PublicKey(config.programID)
+        );
+
+        const sourceLiquidity = await getAssociatedTokenAddress(new PublicKey(assetConfig.mintAddress), publicKey);
+
+        const seed = config.markets[0].address.slice(0, 32);
+        const obligationAccount = await PublicKey.createWithSeed(publicKey, seed, new PublicKey(config.programID));
+
+        if (!(await connection.getAccountInfo(obligationAccount))) {
+            instructions.push(SystemProgram.createAccountWithSeed(
+                {
+                    fromPubkey: publicKey,
+                    newAccountPubkey: obligationAccount,
+                    basePubkey: publicKey,
+                    seed: seed,
+                    lamports: (await connection.getMinimumBalanceForRentExemption(OBLIGATION_SIZE)),
+                    space: OBLIGATION_SIZE,
+                    programId: new PublicKey(config.programID),
+                }
             ));
 
-            const tx = new Transaction().add(...instructions);
-
-            const signature = await sendTransaction(tx, connection);
-            await connection.confirmTransaction(signature, "processed");
-        }
-        else {
-            const config = await (await fetch(`${BASEURI}/api/markets`)).json();
-            const instructions = [];
-
-            const assetConfig = findWhere(config.assets, { symbol: market });
-            const reserveConfig = findWhere(config.markets[0].reserves, { asset: market });
-            const oracleConfig = findWhere(config.oracles.assets, { asset: market });
-
-            const seed = config.markets[0].address.slice(0, 32);
-            const sourceLiquidity = await getAssociatedTokenAddress(new PublicKey(assetConfig.mintAddress), publicKey);
-            const obligationAccount = await PublicKey.createWithSeed(publicKey, seed, new PublicKey(config.programID));
-
-            const allObligation = await getObligations(connection, config, config.markets[0].address);
-            const userObligation = find(allObligation, (r) => r!.data.owner.toString() === publicKey.toString());
-
-            let userDepositedReserves: PublicKey[] = [];
-            let userBorrowedReserves: PublicKey[] = [];
-            if (userObligation) {
-                userObligation.data.deposits.forEach((deposit) => { userDepositedReserves.push(deposit.depositReserve) });
-                userObligation.data.borrows.forEach((borrow) => { userBorrowedReserves.push(borrow.borrowReserve) });
-            }
-
-            instructions.push(refreshReserveInstruction(
-                new PublicKey(reserveConfig.address),
+            instructions.push(initObligationInstruction(
+                obligationAccount,
                 new PublicKey(config.programID),
-                new PublicKey(oracleConfig.priceAddress)
-            ))
-
-            instructions.push(refreshObligationInstruction(
-                userObligation.pubkey,
-                new PublicKey(config.programID),
-                userDepositedReserves,
-                userBorrowedReserves,
-            ))
-
-            instructions.push(repayObligationLiquidityInstruction(
-                depositAmount * 10 ** assetConfig.decimals,
-                new PublicKey(config.programID),
-                sourceLiquidity,
-                new PublicKey(reserveConfig.liquidityAddress),
-                new PublicKey(reserveConfig.address),
-                userObligation.pubkey,
                 new PublicKey(config.markets[0].address),
                 publicKey
             ))
-
-            const tx = new Transaction().add(...instructions);
-
-            const signature = await sendTransaction(tx, connection);
-            await connection.confirmTransaction(signature, "processed");
-            console.log("repay")
         }
-    }, [depositAmount, repayChecked, publicKey, sendTransaction, connection]);
+
+        instructions.push(depositReserveLiquidityAndObligationCollateralInstruction(
+            depositAmount * 10 ** assetConfig.decimals,
+            new PublicKey(config.programID),
+            sourceLiquidity,
+            sourceCollateral,
+            new PublicKey(reserveConfig!.address),
+            new PublicKey(reserveConfig!.liquidityAddress),
+            new PublicKey(reserveConfig!.collateralMintAddress),
+            new PublicKey(config.markets[0].address),
+            authority,
+            new PublicKey(reserveConfig!.collateralSupplyAddress),
+            obligationAccount,
+            publicKey,
+            new PublicKey(oracleConfig.priceAddress),
+            publicKey
+        ));
+
+        const tx = new Transaction().add(...instructions);
+
+        const signature = await sendTransaction(tx, connection);
+        await connection.confirmTransaction(signature, "processed");
+
+    }, [depositAmount, publicKey, sendTransaction, connection]);
 
     return (
         <div
@@ -172,16 +119,8 @@ export function DepositPanel(props: { index: number, market: string, value: numb
             {value === index && (
                 <Box sx={{ p: 3 }}>
                     <Stack spacing={2}>
-                        <TextField id="outlined-basic" label={`Enter ${market} Value`} variant="outlined" onChange={(event) => { setDepositAmount(Number(event.target.value)) }} />
-                        <Grid container>
-                            <Grid item >
-                                <Typography>Repay funds</Typography>
-                            </Grid>
-                            <Grid item >
-                                <Switch checked={repayChecked} onChange={(e) => { setRepayChecked(e.target.checked) }} />
-                            </Grid>
-                        </Grid>
-                        <Button variant="contained" onClick={onClick}>Deposit</Button>
+                        <TextField id="outlined-basic" label={`Enter ${market} Amount`} variant="outlined" onChange={(event) => { setDepositAmount(Number(event.target.value)) }} />
+                        <Button variant="contained" onClick={onClick}>Deposit {market}</Button>
                     </Stack>
                 </Box>
             )}

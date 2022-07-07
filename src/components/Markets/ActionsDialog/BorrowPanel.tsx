@@ -22,7 +22,7 @@ import { withdrawObligationCollateralAndRedeemReserveLiquidity } from '../../../
 import { WAD } from '../../../constants';
 import { BigNumber } from 'bignumber.js';
 
-export function WithdrawPanel(props: { index: number, market: string, value: number }) {
+export function BorrowPanel(props: { index: number, market: string, value: number }) {
     const { value, market, index, ...other } = props;
     const { connection } = useConnection();
     const { publicKey, sendTransaction } = useWallet();
@@ -49,8 +49,20 @@ export function WithdrawPanel(props: { index: number, market: string, value: num
             userObligation.data.borrows.forEach((borrow) => { userBorrowedReserves.push(borrow.borrowReserve) });
         }
 
-        const userCollateralAccount = await getAssociatedTokenAddress(new PublicKey(reserveConfig.collateralMintAddress), publicKey);
         const userLiquidityAccount = await getAssociatedTokenAddress(new PublicKey(assetConfig.mintAddress), publicKey);
+
+        try {
+            await getAccount(connection, userLiquidityAccount);
+        } catch (error: unknown) {
+            if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
+                instructions.push(createAssociatedTokenAccountInstruction(
+                    publicKey,
+                    userLiquidityAccount,
+                    publicKey,
+                    new PublicKey(assetConfig.mintAddress)
+                ));
+            }
+        }
 
         const allReserves: any = await getReserves(connection, config, config.markets[0].address);
         const reserveParsed = find(allReserves, (r) => r!.pubkey.toString() === reserveConfig.address)!.data;
@@ -73,27 +85,16 @@ export function WithdrawPanel(props: { index: number, market: string, value: num
             userBorrowedReserves,
         ))
 
-
-        const totalBorrowWads = reserveParsed.liquidity.borrowedAmountWads;
-        const totalLiquidityWads = (new BigNumber(reserveParsed.liquidity.availableAmount)).multipliedBy(WAD);
-        const totalDepositWads = totalBorrowWads.plus(totalLiquidityWads);
-        const cTokenExchangeRate = totalDepositWads.dividedBy(new BigNumber(reserveParsed.collateral.mintTotalSupply)).dividedBy(WAD);
-
-        instructions.push(withdrawObligationCollateralAndRedeemReserveLiquidity(
-            Number((new BigNumber(withdrawAmount * 10 ** assetConfig.decimals))
-                .dividedBy(cTokenExchangeRate)
-                .integerValue(BigNumber.ROUND_FLOOR).toString()),
+        instructions.push(borrowObligationLiquidityInstruction(
+            withdrawAmount * 10 ** assetConfig.decimals,
             new PublicKey(config.programID),
-            new PublicKey(reserveConfig.collateralSupplyAddress),
-            userCollateralAccount,
+            new PublicKey(reserveConfig.liquidityAddress),
+            userLiquidityAccount,
             new PublicKey(reserveConfig.address),
+            new PublicKey(reserveConfig.liquidityFeeReceiverAddress),
             userObligation.pubkey,
             new PublicKey(config.markets[0].address),
             authority,
-            userLiquidityAccount,
-            new PublicKey(reserveConfig.collateralMintAddress),
-            new PublicKey(reserveConfig.liquidityAddress),
-            publicKey,
             publicKey
         ))
 
@@ -116,7 +117,7 @@ export function WithdrawPanel(props: { index: number, market: string, value: num
                 <Box sx={{ p: 3 }}>
                     <Stack spacing={2}>
                         <TextField id="outlined-basic" label={`Enter ${market} Amount`} variant="outlined" onChange={(event) => { setWithdrawAmount(Number(event.target.value)) }} />
-                        <Button variant="contained" onClick={onClick}>Withdraw {market}</Button>
+                        <Button variant="contained" onClick={onClick}>Borrow {market}</Button>
                     </Stack>
                 </Box>
             )}

@@ -9,19 +9,6 @@ import { getAssociatedTokenAddress, TokenAccountNotFoundError, TokenInvalidAccou
 import { getReserves, getObligations } from '../../utils';
 import { BASEURI } from '../../constants';
 
-function getdepositAPR(market: string) {
-    return 0;
-}
-function getborrowAPR(market: string) {
-    return 0;
-}
-function getUserDeposited(market: string) {
-    return 0;
-}
-function getUserBorrowed(market: string) {
-    return 0;
-}
-
 const SingleMarketMetrics = ({ market }: { market: string }) => {
 
     // Dialog for actions
