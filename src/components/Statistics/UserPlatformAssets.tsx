@@ -16,9 +16,9 @@ function getBorrowed() {
 }
 
 const UserPlatformAssets = () => {
-    const [deposited, setDeposited] = useState(0);
-    const [borrowed, setBorrowed] = useState(0);
-    const [loanHealth, setLoanHealth] = useState(100);
+    const [deposited, setDeposited] = useState("-");
+    const [borrowed, setBorrowed] = useState("-");
+    const [loanHealth, setLoanHealth] = useState("-");
 
     const { connection } = useConnection();
     const { publicKey } = useWallet();
@@ -41,7 +41,6 @@ const UserPlatformAssets = () => {
             const totalDeposit = totalAvailable + totalBorrow;
 
             const tokenOracle = findWhere(tokensOracle, { reserveAddress: reserve.pubkey.toBase58() });
-            console.log(tokenOracle);
 
             const collateralToken = await getAssociatedTokenAddress(reserve.data.collateral.mintPubkey, publicKey);
             let userCollateralBalance: number;

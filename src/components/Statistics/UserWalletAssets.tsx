@@ -24,12 +24,14 @@ const UserWalletAssets = () => {
         const config = await (await fetch('http://localhost:3001/api/markets')).json();
         const tokensOracle = await getTokensOracleData(connection, config, config.markets[0].reserves);
         const allReserves = await getReserves(connection, config, config.markets[0].address);
-
+        console.log(allReserves)
         let totalAssetsValue: number = 0;
         let totalBorrowingPower: number = 0;
 
         for (const asset of config.assets) {
+            console.log(config.assets)
             const tokenAddress = await getAssociatedTokenAddress(new PublicKey(asset.mintAddress), publicKey);
+            console.log(asset.mintAddress)
             if (tokenAddress) {
                 let tokenAssets = await connection.getTokenAccountBalance(tokenAddress);
                 const tokenOracle = findWhere(tokensOracle, { symbol: asset.symbol });
