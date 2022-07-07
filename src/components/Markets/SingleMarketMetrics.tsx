@@ -1,10 +1,10 @@
 import { Grid, Typography, Card, CardContent, CardActionArea, Stack } from "@mui/material"
 import { useState, useEffect } from "react";
-import { ActionsDialog } from "./ActionsDialog";
+import { ActionsPanel } from "./ActionsPanel";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react"
 import { findWhere, find } from "underscore";
 import { PublicKey } from "@solana/web3.js";
-import { getTokensOracleData } from "../../actions/pyth";
+import { getTokensOracleData } from "../../pyth";
 import { getAssociatedTokenAddress, TokenAccountNotFoundError, TokenInvalidAccountOwnerError } from '@solana/spl-token';
 import { getReserves, getObligations } from '../../utils';
 import { BASEURI } from '../../constants';
@@ -185,7 +185,7 @@ const SingleMarketMetrics = ({ market }: { market: string }) => {
                     </Grid>
                 </CardContent>
             </CardActionArea>
-            <ActionsDialog
+            <ActionsPanel
                 open={open}
                 market={market}
                 onClose={handleClose}

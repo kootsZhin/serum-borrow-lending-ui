@@ -2,7 +2,7 @@ import { useConnection, useWallet } from "@solana/wallet-adapter-react"
 import { Card, Grid, Typography } from '@mui/material'
 import { useState, useEffect } from 'react';
 import { PublicKey } from "@solana/web3.js";
-import { getTokensOracleData } from "../../actions/pyth";
+import { getTokensOracleData } from "../../pyth";
 import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { findWhere, find } from 'underscore';
 import { getReserves } from '../../utils';
