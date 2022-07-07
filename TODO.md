@@ -5,3 +5,4 @@
 - check if obligation exists, if not create it
 - assuming only one lending market (pool) now
 - change better variable names
+- maker sure all computations use bignum
