@@ -1,0 +1,3 @@
+- share state in the whole app (e.g. userDeposit)
+- share config in the whole app
+- style

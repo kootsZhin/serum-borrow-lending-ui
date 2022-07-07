@@ -38,7 +38,6 @@ export function DepositPanel(props: { index: number, market: string, value: numb
         try {
             collateralAccount = await getAccount(connection, collateralToken);
         } catch (error: unknown) {
-            console.log(error);
             if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
                 instructions.push(createAssociatedTokenAccountInstruction(
                     publicKey,

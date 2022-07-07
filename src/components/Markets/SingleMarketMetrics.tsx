@@ -5,7 +5,7 @@ import { useConnection, useWallet } from "@solana/wallet-adapter-react"
 import { findWhere, find } from "underscore";
 import { PublicKey } from "@solana/web3.js";
 import { getTokensOracleData } from "../../actions/pyth";
-import { getAssociatedTokenAddress } from '@solana/spl-token';
+import { getAssociatedTokenAddress, TokenAccountNotFoundError, TokenInvalidAccountOwnerError } from '@solana/spl-token';
 import { getReserves } from '../../utils';
 import { ConnectedTvOutlined } from "@mui/icons-material";
 
@@ -42,6 +42,10 @@ const SingleMarketMetrics = ({ market }: { market: string }) => {
     const [totalAvailableValue, setTotalAvailableValue] = useState("");
     const [depositAPR, setdepositAPR] = useState("");
     const [borrowAPR, setborrowAPR] = useState("");
+    const [userDeposited, setUserDeposited] = useState("");
+    const [userDepositedValue, setUserDepositedValue] = useState("");
+    const [userBorrowed, setUserBorrowed] = useState("");
+    const [userBorrowedValue, setUserBorrowedValue] = useState("");
     const [userBalance, setUserBalance] = useState("");
     const [userBalanceValue, setUserBalanceValue] = useState("");
 
@@ -59,7 +63,7 @@ const SingleMarketMetrics = ({ market }: { market: string }) => {
         const asset = findWhere(config.assets, { symbol: market });
         const tokenAddress = await getAssociatedTokenAddress(new PublicKey(asset.mintAddress), publicKey);
         const tokensOracle = await getTokensOracleData(connection, config, config.markets[0].reserves);
-        const allReserves = await getReserves(connection, config, config.markets[0].address);
+        const allReserves: any = await getReserves(connection, config, config.markets[0].address);
 
         if (tokenAddress) {
             let tokenAssets = await connection.getTokenAccountBalance(tokenAddress);
@@ -77,6 +81,20 @@ const SingleMarketMetrics = ({ market }: { market: string }) => {
 
             const currentUtilization = (totalBorrow ? totalBorrowedAmount / totalDeposit : 0)
             const optimalUtilization = (reserveConfig.config.optimalUtilizationRate / 100)
+
+            const collateralToken = await getAssociatedTokenAddress(new PublicKey(reserve.collateralMintAddress), publicKey);
+
+            let userCollateralBalance: number;
+            try {
+                userCollateralBalance = (await connection.getTokenAccountBalance(collateralToken)).value.uiAmount!;
+            } catch (error: unknown) {
+                userCollateralBalance = 0;
+            }
+
+            const totalCollateralSupply = (await connection.getTokenSupply(new PublicKey(reserve.collateralMintAddress))).value.uiAmount || 1;
+
+            const userDeposited = totalDeposit * userCollateralBalance / totalCollateralSupply;
+            const userDepositedValue = userDeposited * tokenOracle.price;
 
             let borrowAPR: number;
             if (optimalUtilization === 1.0 || currentUtilization < optimalUtilization) {
@@ -109,6 +127,9 @@ const SingleMarketMetrics = ({ market }: { market: string }) => {
 
             setborrowAPR((borrowAPR * 100).toString());
             setdepositAPR((depositAPR * 100).toString());
+
+            setUserDeposited(userDeposited.toFixed(2).toString());
+            setUserDepositedValue(userDepositedValue.toFixed(2).toString());
 
             setUserBalance(tokenAssets.value.uiAmount!.toFixed(2).toString());
             setUserBalanceValue((tokenAssets.value.uiAmount! * tokenOracle.price)!.toFixed(2).toString());
@@ -149,7 +170,8 @@ const SingleMarketMetrics = ({ market }: { market: string }) => {
                             <Typography variant="body2">{borrowAPR ? `${borrowAPR}%` : "-"}</Typography>
                         </Grid>
                         <Grid item xs={1}>
-                            <Typography variant="body2">{getUserDeposited(market)}</Typography>
+                            <Typography variant="body2">{userDeposited ? `${userDeposited}` : "-"}</Typography>
+                            <Typography variant="body2">{userDeposited ? `($${userDepositedValue})` : "-"}</Typography>
                         </Grid>
                         <Grid item xs={1}>
                             <Typography variant="body2">{getUserBorrowed(market)}</Typography>
