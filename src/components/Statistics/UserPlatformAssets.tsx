@@ -11,7 +11,7 @@ import { BASEURI } from '../../constants';
 const UserPlatformAssets = () => {
     const [deposited, setDeposited] = useState("-");
     const [borrowed, setBorrowed] = useState("-");
-    const [loanHealth, setLoanHealth] = useState("-");
+    const [loanHealth, setLoanHealth] = useState("-"); //TODO: incorrect need to fix
 
     const { connection } = useConnection();
     const { publicKey } = useWallet();
@@ -31,16 +31,29 @@ const UserPlatformAssets = () => {
         const userObligation = find(allObligation, (r) => r!.data.owner.toBase58() === publicKey.toBase58());
 
         let userDepositedValue = 0;
-        for (const reserve of allReserves) {
-            const userDepositedToken = find(userObligation.data.deposits, (r) => r!.depositReserve.toBase58() === reserve.pubkey.toBase58());
-            const userDepositedTokenBalance = userDepositedToken ? Number(userDepositedToken.depositedAmount.toString()) / 10 ** reserve.data.liquidity.mintDecimals : 0;
-            const tokenOracle = findWhere(tokensOracle, { reserveAddress: reserve.pubkey.toBase58() });
-            const userDepositedTokenBalanceValue = userDepositedTokenBalance * tokenOracle.price;
+        let userBorrowedValue = 0;
+        let userAllowedBorrowValue = 0;
+        if (userObligation) {
+            console.log(userObligation);
+            for (const reserve of allReserves) {
+                const userDepositedToken = find(userObligation.data.deposits, (r) => r!.depositReserve.toBase58() === reserve.pubkey.toBase58());
+                const userDepositedTokenBalance = userDepositedToken ? Number(userDepositedToken.depositedAmount.toString()) / 10 ** reserve.data.liquidity.mintDecimals : 0;
+                const tokenOracle = findWhere(tokensOracle, { reserveAddress: reserve.pubkey.toBase58() });
+                const userDepositedTokenBalanceValue = userDepositedTokenBalance * tokenOracle.price;
 
-            userDepositedValue += userDepositedTokenBalanceValue;
+                const userBorrowedToken = find(userObligation.data.borrows, (r) => r!.borrowReserve.toBase58() === reserve.pubkey.toBase58());
+                const userBorrowedTokenBalance = userBorrowedToken ? Number(userBorrowedToken.borrowedAmountWads.toString()) / 10 ** reserve.data.liquidity.mintDecimals : 0;
+                const userBorrowedTokenBalanceValue = userBorrowedTokenBalance * tokenOracle.price;
+
+                userDepositedValue += userDepositedTokenBalanceValue;
+                userBorrowedValue += userBorrowedTokenBalanceValue;
+                userAllowedBorrowValue += userDepositedValue * (1 - reserve.data.config.loanToValueRatio / 100);
+            }
         }
 
         setDeposited(userDepositedValue.toFixed(2));
+        setBorrowed(userBorrowedValue.toFixed(2));
+        setLoanHealth((userBorrowedValue / userAllowedBorrowValue * 100 || 100).toFixed(2));
     }
 
     return (

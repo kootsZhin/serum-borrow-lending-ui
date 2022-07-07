@@ -110,13 +110,19 @@ const SingleMarketMetrics = ({ market }: { market: string }) => {
 
         let depositedBalance = 0;
         let depositedBalanceValue = 0;
+        let borrowedBalance = 0;
+        let borrowedBalanceValue = 0;
         const userObligation = find(allObligation, (r) => r!.data.owner.toString() === publicKey.toString());
         if (userObligation) {
             const userDeposit = find(userObligation.data.deposits, (r) => r!.depositReserve.toString() === reserve.address);
+            const userBorrow = find(userObligation.data.borrows, (r) => r!.borrowReserve.toString() === reserve.address);
             const tokenOracle = findWhere(tokensOracle, { symbol: asset.symbol });
 
             depositedBalance = userDeposit ? Number(userDeposit.depositedAmount.toString()) / 10 ** reserveConfig.liquidity.mintDecimals : 0;
             depositedBalanceValue = depositedBalance * tokenOracle.price;
+
+            borrowedBalance = userDeposit ? Number(userBorrow.borrowedAmountWads.toString()) / 10 ** reserveConfig.liquidity.mintDecimals : 0;
+            borrowedBalanceValue = borrowedBalance * tokenOracle.price;
         }
 
         setTotalDeposit(availableAmount.toFixed(2).toString());
@@ -128,14 +134,17 @@ const SingleMarketMetrics = ({ market }: { market: string }) => {
         setTotalAvailable(totalDeposit.toFixed(2).toString());
         setTotalAvailableValue(totalDepositValue.toFixed(2).toString());
 
-        setborrowAPR((borrowAPR * 100).toString());
-        setdepositAPR((depositAPR * 100).toString());
+        setborrowAPR((borrowAPR * 100).toFixed(2).toString());
+        setdepositAPR((depositAPR * 100).toFixed(2).toString());
 
         setUserBalance(tokenAssetsBalance.toFixed(2).toString());
         setUserBalanceValue((tokenAssetsBalance * tokenOracle.price)!.toFixed(2).toString());
 
         setUserDeposited(depositedBalance.toFixed(2).toString());
         setUserDepositedValue(depositedBalanceValue.toFixed(2).toString());
+
+        setUserBorrowed(borrowedBalance.toFixed(2).toString());
+        setUserBorrowedValue(borrowedBalanceValue.toFixed(2).toString());
     }
 
 
@@ -176,8 +185,10 @@ const SingleMarketMetrics = ({ market }: { market: string }) => {
                             <Typography variant="body2">{userDeposited ? `($${userDepositedValue})` : "-"}</Typography>
                         </Grid>
                         <Grid item xs={1}>
-                            <Typography variant="body2">{getUserBorrowed(market)}</Typography>
+                            <Typography variant="body2">{userBorrowed ? `${userBorrowed}` : "-"}</Typography>
+                            <Typography variant="body2">{userBorrowed ? `($${userBorrowedValue})` : "-"}</Typography>
                         </Grid>
+
                         <Grid item xs={1}>
                             <Stack>
                                 <Typography variant="body2">{userBalance ? `${userBalance}` : "-"}</Typography>
