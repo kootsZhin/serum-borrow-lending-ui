@@ -30,20 +30,21 @@ const columns: readonly Column[] = [
     { id: "borrowAPR", label: "Borrow APR" },
     { id: "loanToValue", label: "LTV", format: (value) => `${value}%` },
 
-    { id: "userDeposited", label: "My Deposited" },
-    { id: "userBorrowed", label: "My Borrowed" },
+    { id: "userDeposit", label: "My Deposit" },
+    { id: "userBorrow", label: "My Borrow" },
     { id: "userBalance", label: "My Balance" },
 ];
 
 export default function Markets() {
     const [markets, setMarkets] = useState([]);
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState("");
 
-    const handleClickOpen = () => {
-        setOpen(true);
+    const handleClickOpen = (token) => {
+        setOpen(token);
     };
     const handleClose = () => {
-        setOpen(false);
+        setOpen("");
+        getMarkets();
     };
 
     useEffect(() => {
@@ -86,17 +87,17 @@ export default function Markets() {
                         {
                             markets.map((token) => (
                                 <>
-                                    <TableRow hover onClick={handleClickOpen}>
-                                        <MarketTableRow token={token} />
-                                        <UserTableRow token={token} />
+                                    <TableRow hover onClick={() => { handleClickOpen(token) }} key={token}>
+                                        <MarketTableRow token={token} key={token} />
+                                        <UserTableRow token={token} key={token} />
                                     </TableRow>
                                     <ActionsPanel
-                                        open={open}
+                                        key={token}
+                                        open={open === token}
                                         asset={token}
                                         onClose={handleClose}
                                     />
                                 </>
-
                             ))
                         }
                     </TableBody>

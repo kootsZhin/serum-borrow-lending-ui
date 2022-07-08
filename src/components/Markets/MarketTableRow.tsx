@@ -22,10 +22,10 @@ const MarketTableRow = ({ token }: { token: string }) => {
     const [loanToValue, setLoanToValue] = useState("");
 
     useEffect(() => {
-        getReserveMetrics();
+        getPoolMetrics();
     }, [])
 
-    const getReserveMetrics = async () => {
+    const getPoolMetrics = async () => {
         const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 
         const config = await (await fetch(`${BASEURI}/api/markets`)).json();
@@ -90,9 +90,9 @@ const MarketTableRow = ({ token }: { token: string }) => {
             <TableCell>{totalDeposit ? `${totalDeposit} ($${totalDepositValue})` : "-"}</TableCell>
             <TableCell>{totalBorrow ? `${totalBorrow} ($${totalBorrowValue})` : "-"}</TableCell>
             <TableCell>{totalAvailable ? `${totalAvailable} ($${totalAvailableValue})` : "-"}</TableCell>
-            <TableCell>{depositAPR ? depositAPR : "-"}</TableCell>
-            <TableCell>{borrowAPR ? borrowAPR : "-"}</TableCell>
-            <TableCell>{loanToValue ? loanToValue : "-"}</TableCell>
+            <TableCell>{depositAPR ? `${depositAPR}%` : "-"}</TableCell>
+            <TableCell>{borrowAPR ? `${borrowAPR}%` : "-"}</TableCell>
+            <TableCell>{loanToValue ? `${loanToValue}%` : "-"}</TableCell>
         </>
     )
 }

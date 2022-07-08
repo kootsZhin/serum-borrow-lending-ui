@@ -76,7 +76,7 @@ const UserTableRow = ({ token }: { token: string }) => {
 
     return (
         <>
-            <TableCell>{userDeposited ? `${userDeposited} ($${(userDepositedValue).toLocaleString('en')})` : "-"}</TableCell>
+            <TableCell>{userDeposited ? `${userDeposited} ($${(userDepositedValue)})` : "-"}</TableCell>
             <TableCell>{userBorrowed ? `${userBorrowed} ($${userBorrowedValue})` : "-"}</TableCell>
             <TableCell>{userBalance ? `${userBalance} ($${userBalanceValue})` : "-"}</TableCell>
         </>

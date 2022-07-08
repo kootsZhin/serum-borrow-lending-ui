@@ -53,7 +53,6 @@ const UserPlatformAssets = () => {
 
         setDeposited(userDepositedValue.toFixed(2));
         setBorrowed(userBorrowedValue.toFixed(2));
-        setLoanHealth((userBorrowedValue / userAllowedBorrowValue * 100 || 100).toFixed(2));
     }
 
     return (
@@ -65,41 +64,30 @@ const UserPlatformAssets = () => {
                     </Typography>
                 </Grid>
 
-                <Grid item xs={4}>
+                <Grid item xs={6}>
                     <Typography variant="body2">
                         Deposited:
                     </Typography>
                 </Grid>
 
-                <Grid item xs={4}>
+                <Grid item xs={6}>
                     <Typography variant="body2">
                         Borrowed:
                     </Typography>
                 </Grid>
 
-                <Grid item xs={4}>
-                    <Typography variant="body2">
-                        Loan Health:
-                    </Typography>
-                </Grid>
-
-                <Grid item xs={4}>
+                <Grid item xs={6}>
                     <Typography variant="body2">
                         ${deposited}
                     </Typography>
                 </Grid>
 
-                <Grid item xs={4}>
+                <Grid item xs={6}>
                     <Typography variant="body2">
                         ${borrowed}
                     </Typography>
                 </Grid>
 
-                <Grid item xs={4}>
-                    <Typography variant="body2">
-                        {loanHealth}%
-                    </Typography>
-                </Grid>
             </Grid>
         </Card>
     );
