@@ -1,28 +1,15 @@
 import { Grid, Typography, Card, CardContent, CardActionArea, Stack } from "@mui/material"
 import { useState, useEffect } from "react";
-import { ActionsDialog } from "./ActionsDialog";
+import { ActionsPanel } from "./ActionsPanel";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react"
 import { findWhere, find } from "underscore";
 import { PublicKey } from "@solana/web3.js";
-import { getTokensOracleData } from "../../actions/pyth";
+import { getTokensOracleData } from "../../pyth";
 import { getAssociatedTokenAddress, TokenAccountNotFoundError, TokenInvalidAccountOwnerError } from '@solana/spl-token';
 import { getReserves, getObligations } from '../../utils';
 import { BASEURI } from '../../constants';
 
-function getdepositAPR(market: string) {
-    return 0;
-}
-function getborrowAPR(market: string) {
-    return 0;
-}
-function getUserDeposited(market: string) {
-    return 0;
-}
-function getUserBorrowed(market: string) {
-    return 0;
-}
-
-const SingleMarketMetrics = ({ market }: { market: string }) => {
+const SingleMarketMetrics = ({ token }: { token: string }) => {
 
     // Dialog for actions
     const [open, setOpen] = useState(false);
@@ -60,10 +47,9 @@ const SingleMarketMetrics = ({ market }: { market: string }) => {
 
     const getReserveMetrics = async (publicKey: PublicKey) => {
         const config = await (await fetch(`${BASEURI}/api/markets`)).json();
-        const asset = findWhere(config.assets, { symbol: market });
+        const asset = findWhere(config.assets, { symbol: token });
         const tokensOracle = await getTokensOracleData(connection, config, config.markets[0].reserves);
         const allReserves: any = await getReserves(connection, config, config.markets[0].address);
-
         const tokenOracle = findWhere(tokensOracle, { symbol: asset.symbol });
         const reserve = findWhere(config.markets[0].reserves, { asset: asset.symbol });
         const reserveConfig = find(allReserves, (r) => r!.pubkey.toString() === reserve.address)!.data;
@@ -76,7 +62,7 @@ const SingleMarketMetrics = ({ market }: { market: string }) => {
         const totalBorrowedAmountValue = totalBorrowedAmount * tokenOracle.price
         const totalDepositValue = availableAmountValue + totalBorrowedAmountValue;
 
-        const currentUtilization = (totalBorrow ? totalBorrowedAmount / totalDeposit : 0)
+        const currentUtilization = (totalBorrowedAmount ? totalBorrowedAmount / totalDeposit : 0)
         const optimalUtilization = (reserveConfig.config.optimalUtilizationRate / 100)
 
         let borrowAPR = 0;
@@ -121,18 +107,18 @@ const SingleMarketMetrics = ({ market }: { market: string }) => {
             depositedBalance = userDeposit ? Number(userDeposit.depositedAmount.toString()) / 10 ** reserveConfig.liquidity.mintDecimals : 0;
             depositedBalanceValue = depositedBalance * tokenOracle.price;
 
-            borrowedBalance = userDeposit ? Number(userBorrow.borrowedAmountWads.toString()) / 10 ** reserveConfig.liquidity.mintDecimals : 0;
+            borrowedBalance = userBorrow ? Number(userBorrow.borrowedAmountWads.toString()) / 10 ** reserveConfig.liquidity.mintDecimals : 0;
             borrowedBalanceValue = borrowedBalance * tokenOracle.price;
         }
 
-        setTotalDeposit(availableAmount.toFixed(2).toString());
-        setTotalDepositValue(availableAmountValue.toFixed(2).toString());
+        setTotalAvailable(availableAmount.toFixed(2).toString());
+        setTotalAvailableValue(availableAmountValue.toFixed(2).toString());
 
         setTotalBorrow(totalBorrowedAmount.toFixed(2).toString());
         setTotalBorrowValue(totalBorrowedAmountValue.toFixed(2).toString());
 
-        setTotalAvailable(totalDeposit.toFixed(2).toString());
-        setTotalAvailableValue(totalDepositValue.toFixed(2).toString());
+        setTotalDeposit(totalDeposit.toFixed(2).toString());
+        setTotalDepositValue(totalDepositValue.toFixed(2).toString());
 
         setborrowAPR((borrowAPR * 100).toFixed(2).toString());
         setdepositAPR((depositAPR * 100).toFixed(2).toString());
@@ -154,7 +140,7 @@ const SingleMarketMetrics = ({ market }: { market: string }) => {
                 <CardContent>
                     <Grid container columns={9}>
                         <Grid item xs={1}>
-                            <Typography variant="body2">{market}</Typography>
+                            <Typography variant="body2">{token}</Typography>
                         </Grid>
                         <Grid item xs={1}>
                             <Stack>
@@ -198,9 +184,9 @@ const SingleMarketMetrics = ({ market }: { market: string }) => {
                     </Grid>
                 </CardContent>
             </CardActionArea>
-            <ActionsDialog
+            <ActionsPanel
                 open={open}
-                market={market}
+                asset={token}
                 onClose={handleClose}
             />
         </Card >

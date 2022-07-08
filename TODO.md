@@ -1,8 +1,8 @@
 - share state in the whole app (e.g. userDeposit)
 - share config in the whole app
-- combining depositing assets and collateral
-- use depositreserve&collateral withdrawcollateral&redeemcollateral
-- check if obligation exists, if not create it
 - assuming only one lending market (pool) now
 - change better variable names
-- maker sure all computations use bignum
+- make sure all computations use bignum
+- make sure metrics are correct
+- show tx
+- max min input check + button

@@ -4,7 +4,7 @@ import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { PublicKey } from '@solana/web3.js';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { getReserves, getObligations } from '../../utils';
-import { getTokensOracleData } from "../../actions/pyth";
+import { getTokensOracleData } from "../../pyth";
 import { findWhere, find } from 'underscore';
 import { BASEURI } from '../../constants';
 
@@ -34,7 +34,7 @@ const UserPlatformAssets = () => {
         let userBorrowedValue = 0;
         let userAllowedBorrowValue = 0;
         if (userObligation) {
-            console.log(userObligation);
+
             for (const reserve of allReserves) {
                 const userDepositedToken = find(userObligation.data.deposits, (r) => r!.depositReserve.toBase58() === reserve.pubkey.toBase58());
                 const userDepositedTokenBalance = userDepositedToken ? Number(userDepositedToken.depositedAmount.toString()) / 10 ** reserve.data.liquidity.mintDecimals : 0;
