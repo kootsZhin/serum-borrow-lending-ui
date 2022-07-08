@@ -50,10 +50,6 @@ const SingleMarketMetrics = ({ token }: { token: string }) => {
         const asset = findWhere(config.assets, { symbol: token });
         const tokensOracle = await getTokensOracleData(connection, config, config.markets[0].reserves);
         const allReserves: any = await getReserves(connection, config, config.markets[0].address);
-        console.log(tokensOracle)
-        console.log(token)
-        console.log(asset)
-        console.log(asset.symbol)
         const tokenOracle = findWhere(tokensOracle, { symbol: asset.symbol });
         const reserve = findWhere(config.markets[0].reserves, { asset: asset.symbol });
         const reserveConfig = find(allReserves, (r) => r!.pubkey.toString() === reserve.address)!.data;
@@ -66,17 +62,25 @@ const SingleMarketMetrics = ({ token }: { token: string }) => {
         const totalBorrowedAmountValue = totalBorrowedAmount * tokenOracle.price
         const totalDepositValue = availableAmountValue + totalBorrowedAmountValue;
 
-        const currentUtilization = (totalBorrow ? totalBorrowedAmount / totalDeposit : 0)
+        const currentUtilization = (totalBorrowedAmount ? totalBorrowedAmount / totalDeposit : 0)
         const optimalUtilization = (reserveConfig.config.optimalUtilizationRate / 100)
 
         let borrowAPR = 0;
         if (optimalUtilization === 1.0 || currentUtilization < optimalUtilization) {
+            console.log("case1")
             const normalizedFactor = currentUtilization / optimalUtilization;
             const optimalBorrowRate = reserveConfig.config.optimalBorrowRate / 100;
             const minBorrowRate = reserveConfig.config.minBorrowRate / 100;
             borrowAPR =
                 normalizedFactor * (optimalBorrowRate - minBorrowRate) + minBorrowRate;
+            console.log(currentUtilization)
+            console.log(optimalUtilization)
+            console.log(normalizedFactor)
+            console.log(optimalBorrowRate)
+            console.log(minBorrowRate)
+            console.log(borrowAPR)
         } else {
+            console.log("case2")
             const normalizedFactor =
                 (currentUtilization - optimalUtilization) / (1 - optimalUtilization);
             const optimalBorrowRate = reserveConfig.config.optimalBorrowRate / 100;
@@ -115,14 +119,14 @@ const SingleMarketMetrics = ({ token }: { token: string }) => {
             borrowedBalanceValue = borrowedBalance * tokenOracle.price;
         }
 
-        setTotalDeposit(availableAmount.toFixed(2).toString());
-        setTotalDepositValue(availableAmountValue.toFixed(2).toString());
+        setTotalAvailable(availableAmount.toFixed(2).toString());
+        setTotalAvailableValue(availableAmountValue.toFixed(2).toString());
 
         setTotalBorrow(totalBorrowedAmount.toFixed(2).toString());
         setTotalBorrowValue(totalBorrowedAmountValue.toFixed(2).toString());
 
-        setTotalAvailable(totalDeposit.toFixed(2).toString());
-        setTotalAvailableValue(totalDepositValue.toFixed(2).toString());
+        setTotalDeposit(totalDeposit.toFixed(2).toString());
+        setTotalDepositValue(totalDepositValue.toFixed(2).toString());
 
         setborrowAPR((borrowAPR * 100).toFixed(2).toString());
         setdepositAPR((depositAPR * 100).toFixed(2).toString());
