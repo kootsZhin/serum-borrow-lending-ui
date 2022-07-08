@@ -7,6 +7,7 @@ import { BigNumber } from "bignumber.js";
 import { refreshReserveInstruction, refreshObligationInstruction, withdrawObligationCollateralAndRedeemReserveLiquidity } from "../models/instructions";
 import { getObligations, getReserves } from "../utils";
 import { BASEURI, WAD } from '../constants';
+import { refreshReserves } from "./refreshReserves";
 
 export const withdraw = async (connection: Connection, publicKey: PublicKey, asset: string, withdrawAmount: number) => {
     const config = await (await fetch(`${BASEURI}/api/markets`)).json();
@@ -43,6 +44,8 @@ export const withdraw = async (connection: Connection, publicKey: PublicKey, ass
         new PublicKey(oracleConfig.priceAddress)
     ))
 
+    refreshReserves(instructions, userDepositedReserves, config);
+    refreshReserves(instructions, userBorrowedReserves, config);
     instructions.push(refreshObligationInstruction(
         userObligation.pubkey,
         new PublicKey(config.programID),

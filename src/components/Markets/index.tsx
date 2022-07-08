@@ -33,8 +33,8 @@ const Markets = () => {
                     <Typography variant='h6'>All Markets</Typography>
                     <MetricsHeading />
                     {
-                        markets.map((asset) => (
-                            <SingleMarketMetrics asset={asset} key={asset} />
+                        markets.map((token) => (
+                            <SingleMarketMetrics token={token} key={token} />
                         ))
                     }
                 </Stack>

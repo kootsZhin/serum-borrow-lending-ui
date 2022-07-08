@@ -13,9 +13,11 @@ import { refreshReserveInstruction, refreshObligationInstruction, borrowObligati
 import { BASEURI } from '../constants';
 import { getObligations } from '../utils';
 import { getReserves } from '../utils';
+import { Config } from '../global';
+import { refreshReserves } from './refreshReserves';
 
 export const borrow = async (connection: Connection, publicKey: PublicKey, asset: string, withdrawAmount: number) => {
-    const config = await (await fetch(`${BASEURI}/api/markets`)).json();
+    const config: Config = await (await fetch(`${BASEURI}/api/markets`)).json();
     const instructions = [];
 
     const assetConfig = findWhere(config.assets, { symbol: asset });
@@ -46,9 +48,6 @@ export const borrow = async (connection: Connection, publicKey: PublicKey, asset
         }
     }
 
-    const allReserves: any = await getReserves(connection, config, config.markets[0].address);
-    const reserveParsed = find(allReserves, (r) => r!.pubkey.toString() === reserveConfig.address)!.data;
-
     const [authority] = await PublicKey.findProgramAddress(
         [new PublicKey(config.markets[0].address).toBuffer()],
         new PublicKey(config.programID)
@@ -60,6 +59,8 @@ export const borrow = async (connection: Connection, publicKey: PublicKey, asset
         new PublicKey(oracleConfig.priceAddress)
     ))
 
+    refreshReserves(instructions, userDepositedReserves, config);
+    refreshReserves(instructions, userBorrowedReserves, config);
     instructions.push(refreshObligationInstruction(
         userObligation.pubkey,
         new PublicKey(config.programID),

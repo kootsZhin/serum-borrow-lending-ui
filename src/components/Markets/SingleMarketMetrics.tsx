@@ -9,7 +9,7 @@ import { getAssociatedTokenAddress, TokenAccountNotFoundError, TokenInvalidAccou
 import { getReserves, getObligations } from '../../utils';
 import { BASEURI } from '../../constants';
 
-const SingleMarketMetrics = ({ market }: { market: string }) => {
+const SingleMarketMetrics = ({ token }: { token: string }) => {
 
     // Dialog for actions
     const [open, setOpen] = useState(false);
@@ -47,10 +47,13 @@ const SingleMarketMetrics = ({ market }: { market: string }) => {
 
     const getReserveMetrics = async (publicKey: PublicKey) => {
         const config = await (await fetch(`${BASEURI}/api/markets`)).json();
-        const asset = findWhere(config.assets, { symbol: market });
+        const asset = findWhere(config.assets, { symbol: token });
         const tokensOracle = await getTokensOracleData(connection, config, config.markets[0].reserves);
         const allReserves: any = await getReserves(connection, config, config.markets[0].address);
-
+        console.log(tokensOracle)
+        console.log(token)
+        console.log(asset)
+        console.log(asset.symbol)
         const tokenOracle = findWhere(tokensOracle, { symbol: asset.symbol });
         const reserve = findWhere(config.markets[0].reserves, { asset: asset.symbol });
         const reserveConfig = find(allReserves, (r) => r!.pubkey.toString() === reserve.address)!.data;
@@ -108,7 +111,7 @@ const SingleMarketMetrics = ({ market }: { market: string }) => {
             depositedBalance = userDeposit ? Number(userDeposit.depositedAmount.toString()) / 10 ** reserveConfig.liquidity.mintDecimals : 0;
             depositedBalanceValue = depositedBalance * tokenOracle.price;
 
-            borrowedBalance = userDeposit ? Number(userBorrow.borrowedAmountWads.toString()) / 10 ** reserveConfig.liquidity.mintDecimals : 0;
+            borrowedBalance = userBorrow ? Number(userBorrow.borrowedAmountWads.toString()) / 10 ** reserveConfig.liquidity.mintDecimals : 0;
             borrowedBalanceValue = borrowedBalance * tokenOracle.price;
         }
 
@@ -141,7 +144,7 @@ const SingleMarketMetrics = ({ market }: { market: string }) => {
                 <CardContent>
                     <Grid container columns={9}>
                         <Grid item xs={1}>
-                            <Typography variant="body2">{market}</Typography>
+                            <Typography variant="body2">{token}</Typography>
                         </Grid>
                         <Grid item xs={1}>
                             <Stack>
@@ -187,7 +190,7 @@ const SingleMarketMetrics = ({ market }: { market: string }) => {
             </CardActionArea>
             <ActionsPanel
                 open={open}
-                market={market}
+                asset={token}
                 onClose={handleClose}
             />
         </Card >

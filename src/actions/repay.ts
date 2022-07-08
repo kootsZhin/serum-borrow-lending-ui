@@ -7,6 +7,7 @@ import { refreshReserveInstruction, refreshObligationInstruction, repayObligatio
 import { getObligations } from "../utils";
 import { BASEURI } from '../constants';
 import { Config } from '../global';
+import { refreshReserves } from "./refreshReserves";
 
 export const repay = async (connection: Connection, publicKey: PublicKey, asset: string, repayAmount: number) => {
     const config: Config = await (await fetch(`${BASEURI}/api/markets`)).json();
@@ -34,6 +35,8 @@ export const repay = async (connection: Connection, publicKey: PublicKey, asset:
         new PublicKey(oracleConfig.priceAddress)
     ))
 
+    refreshReserves(instructions, userDepositedReserves, config);
+    refreshReserves(instructions, userBorrowedReserves, config);
     instructions.push(refreshObligationInstruction(
         userObligation.pubkey,
         new PublicKey(config.programID),
