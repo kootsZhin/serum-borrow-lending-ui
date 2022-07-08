@@ -11,7 +11,6 @@ import { BASEURI } from '../../constants';
 const UserPlatformAssets = () => {
     const [deposited, setDeposited] = useState("-");
     const [borrowed, setBorrowed] = useState("-");
-    const [loanHealth, setLoanHealth] = useState("-"); //TODO: incorrect need to fix
 
     const { connection } = useConnection();
     const { publicKey } = useWallet();
@@ -32,7 +31,6 @@ const UserPlatformAssets = () => {
 
         let userDepositedValue = 0;
         let userBorrowedValue = 0;
-        let userAllowedBorrowValue = 0;
         if (userObligation) {
 
             for (const reserve of allReserves) {
@@ -47,7 +45,6 @@ const UserPlatformAssets = () => {
 
                 userDepositedValue += userDepositedTokenBalanceValue;
                 userBorrowedValue += userBorrowedTokenBalanceValue;
-                userAllowedBorrowValue += userDepositedValue * (1 - reserve.data.config.loanToValueRatio / 100);
             }
         }
 

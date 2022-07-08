@@ -10,6 +10,6 @@ export const sendAndNotifyTransactions = async (connection, sendTransaction, not
         await connection.confirmTransaction(signature, 'processed');
         notify('success', 'Transaction successful!', signature);
     } catch (error: unknown) {
-        notify("error", `Transaction failed: ${error}`);
+        notify("error", `Error: ${error}`);
     }
 }
