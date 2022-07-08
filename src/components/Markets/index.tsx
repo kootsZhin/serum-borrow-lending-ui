@@ -11,7 +11,7 @@ import { useState, useEffect } from 'react'
 import { BASEURI } from '../../constants'
 import MarketTableRow from './MarketTableRow';
 import UserTableRow from './UserTableRow';
-import { ActionsPanel } from './ActionsPanel';
+import ActionsPanel from './ActionPanel';
 
 interface Column {
     id: string;
