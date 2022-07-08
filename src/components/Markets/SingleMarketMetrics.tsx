@@ -34,6 +34,8 @@ const SingleMarketMetrics = ({ token }: { token: string }) => {
     const [totalAvailableValue, setTotalAvailableValue] = useState("");
     const [depositAPR, setdepositAPR] = useState("");
     const [borrowAPR, setborrowAPR] = useState("");
+    const [loanToValue, setLoanToValue] = useState("");
+
     const [userDeposited, setUserDeposited] = useState("");
     const [userDepositedValue, setUserDepositedValue] = useState("");
     const [userBorrowed, setUserBorrowed] = useState("");
@@ -52,7 +54,6 @@ const SingleMarketMetrics = ({ token }: { token: string }) => {
     }, [publicKey])
 
     const getReserveMetrics = async () => {
-        console.log("Getting reserve metrics for: " + token);
         const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 
         const config = await (await fetch(`${BASEURI}/api/markets`)).json();
@@ -93,6 +94,8 @@ const SingleMarketMetrics = ({ token }: { token: string }) => {
 
         const depositAPR = borrowAPR * currentUtilization;
 
+        const loanToValue = reserveConfig.config.loanToValueRatio;
+
         setTotalAvailable(availableAmount.toFixed(2).toString());
         setTotalAvailableValue(availableAmountValue.toFixed(2).toString());
 
@@ -104,6 +107,8 @@ const SingleMarketMetrics = ({ token }: { token: string }) => {
 
         setborrowAPR((borrowAPR * 100).toFixed(2).toString());
         setdepositAPR((depositAPR * 100).toFixed(2).toString());
+
+        setLoanToValue(loanToValue.toString());
     }
 
     const getUserMetrics = async (publicKey: PublicKey) => {
@@ -157,7 +162,7 @@ const SingleMarketMetrics = ({ token }: { token: string }) => {
         <Card >
             <CardActionArea onClick={handleClickOpen}>
                 <CardContent>
-                    <Grid container columns={9}>
+                    <Grid container columns={10}>
                         <Grid item xs={1}>
                             <Typography variant="body2">{token}</Typography>
                         </Grid>
@@ -178,6 +183,9 @@ const SingleMarketMetrics = ({ token }: { token: string }) => {
                                 <Typography variant="body2">{totalAvailable ? `${totalAvailable}` : "-"}</Typography>
                                 <Typography variant="body2">{totalAvailable ? `($${totalAvailableValue})` : "-"}</Typography>
                             </Stack>
+                        </Grid>
+                        <Grid item xs={1}>
+                            <Typography variant="body2">{loanToValue ? `${loanToValue}%` : "-"}</Typography>
                         </Grid>
                         <Grid item xs={1}>
                             <Typography variant="body2">{depositAPR ? `${depositAPR}%` : "-"}</Typography>

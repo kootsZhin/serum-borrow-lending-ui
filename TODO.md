@@ -1,8 +1,3 @@
-- share state in the whole app (e.g. userDeposit)
-- share config in the whole app
 - assuming only one lending market (pool) now
-- change better variable names
-- make sure all computations use bignum
 - make sure metrics are correct
-- show tx
 - max min input check + button

@@ -4,7 +4,7 @@ const MetricsHeading = () => {
     return (
         <Card>
             <CardContent>
-                <Grid container columns={9}>
+                <Grid container columns={10}>
                     <Grid item xs={1}>
                         <Typography variant="body1">Token</Typography>
                     </Grid>
@@ -16,6 +16,9 @@ const MetricsHeading = () => {
                     </Grid>
                     <Grid item xs={1}>
                         <Typography variant="body1">Total available</Typography>
+                    </Grid>
+                    <Grid item xs={1}>
+                        <Typography variant="body1">LTV</Typography>
                     </Grid>
                     <Grid item xs={1}>
                         <Typography variant="body1">Deposit APR</Typography>

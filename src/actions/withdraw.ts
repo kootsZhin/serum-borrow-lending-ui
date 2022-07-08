@@ -63,13 +63,6 @@ export const withdraw = async (connection: Connection, publicKey: PublicKey, ass
         .dividedBy(cTokenExchangeRate)
         .integerValue(BigNumber.ROUND_FLOOR).toString())
 
-    console.log("withdrawAmount", withdrawAmount.toString());
-    console.log("totalBorrowWads", totalBorrowWads.toString());
-    console.log("totalLiquidityWads", totalLiquidityWads.toString());
-    console.log("totalDepositWads", totalDepositWads.toString());
-    console.log("cTokenExchangeRate", cTokenExchangeRate.toString());
-    console.log("withdrawCollateralAmount", withdrawCollateralAmount);
-
     instructions.push(withdrawObligationCollateralAndRedeemReserveLiquidity(
         withdrawCollateralAmount,
         new PublicKey(config.programID),
