@@ -1,9 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { Config } from '../../src/global'
-import dotenv from 'dotenv'
-
-dotenv.config();
 
 export default function handler(
     req: NextApiRequest,
@@ -11,41 +8,41 @@ export default function handler(
 ) {
     res.status(200).json(
         {
-            "programID": `${process.env.PROGRAM_ID}`,
+            "programID": `${process.env.NEXT_PUBLIC_PROGRAM_ID}`,
             "assets": [
                 {
                     "name": "Bitcon",
                     "symbol": "BTC",
-                    "decimals": Number(`${process.env.USDC_DECIMAL}`),
-                    "mintAddress": `${process.env.USDC_ADDR}`,
+                    "decimals": Number(`${process.env.NEXT_PUBLIC_USDC_DECIMAL}`),
+                    "mintAddress": `${process.env.NEXT_PUBLIC_USDC_ADDR}`,
                 },
                 {
                     "name": "Wrapped SOL",
                     "symbol": "WSOL",
-                    "decimals": Number(`${process.env.WRAPPED_SOL_DECIMAL}`),
-                    "mintAddress": `${process.env.WRAPPED_SOL_ADDR}`,
+                    "decimals": Number(`${process.env.NEXT_PUBLIC_WRAPPED_SOL_DECIMAL}`),
+                    "mintAddress": `${process.env.NEXT_PUBLIC_WRAPPED_SOL_ADDR}`,
                 }
             ],
             "markets": [
                 {
                     "name": "main",
-                    "address": `${process.env.MARKET_ADDR}`,
+                    "address": `${process.env.NEXT_PUBLIC_MARKET_ADDR}`,
                     "reserves": [
                         {
                             "asset": "BTC",
-                            "address": `${process.env.USDC_RESERVE_ADDR}`,
-                            "collateralMintAddress": `${process.env.USDC_COLLATERAL_MINT_ADDR}`,
-                            "collateralSupplyAddress": `${process.env.USDC_COLLATERAL_SUPPLY_ADDR}`,
-                            "liquidityAddress": `${process.env.USDC_RESERVE_LIQUIDITY_ADDR}`,
-                            "liquidityFeeReceiverAddress": `${process.env.USDC_RESERVE_LIQUIDITY_FEE_RECEIVER_ADDR}`
+                            "address": `${process.env.NEXT_PUBLIC_USDC_RESERVE_ADDR}`,
+                            "collateralMintAddress": `${process.env.NEXT_PUBLIC_USDC_COLLATERAL_MINT_ADDR}`,
+                            "collateralSupplyAddress": `${process.env.NEXT_PUBLIC_USDC_COLLATERAL_SUPPLY_ADDR}`,
+                            "liquidityAddress": `${process.env.NEXT_PUBLIC_USDC_RESERVE_LIQUIDITY_ADDR}`,
+                            "liquidityFeeReceiverAddress": `${process.env.NEXT_PUBLIC_USDC_RESERVE_LIQUIDITY_FEE_RECEIVER_ADDR}`
                         },
                         {
                             "asset": "WSOL",
-                            "address": `${process.env.WRAPPED_SOL_RESERVE_ADDR}`,
-                            "collateralMintAddress": `${process.env.WRAPPED_SOL_COLLATERAL_MINT_ADDR}`,
-                            "collateralSupplyAddress": `${process.env.WRAPPED_SOL_COLLATERAL_SUPPLY_ADDR}`,
-                            "liquidityAddress": `${process.env.WRAPPED_SOL_RESERVE_LIQUIDITY_ADDR}`,
-                            "liquidityFeeReceiverAddress": `${process.env.WRAPPED_SOL_RESERVE_LIQUIDITY_FEE_RECEIVER_ADDR}`
+                            "address": `${process.env.NEXT_PUBLIC_WRAPPED_SOL_RESERVE_ADDR}`,
+                            "collateralMintAddress": `${process.env.NEXT_PUBLIC_WRAPPED_SOL_COLLATERAL_MINT_ADDR}`,
+                            "collateralSupplyAddress": `${process.env.NEXT_PUBLIC_WRAPPED_SOL_COLLATERAL_SUPPLY_ADDR}`,
+                            "liquidityAddress": `${process.env.NEXT_PUBLIC_WRAPPED_SOL_RESERVE_LIQUIDITY_ADDR}`,
+                            "liquidityFeeReceiverAddress": `${process.env.NEXT_PUBLIC_WRAPPED_SOL_RESERVE_LIQUIDITY_FEE_RECEIVER_ADDR}`
                         }
                     ]
                 }
