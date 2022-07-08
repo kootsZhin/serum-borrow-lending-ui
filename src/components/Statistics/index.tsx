@@ -1,5 +1,4 @@
 import { Grid } from '@mui/material'
-import UserWalletAssets from './UserWalletAssets'
 import PoolOverview from './PoolOverview'
 import UserPlatformAssets from './UserPlatformAssets'
 
