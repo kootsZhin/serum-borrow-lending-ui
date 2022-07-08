@@ -67,20 +67,12 @@ const SingleMarketMetrics = ({ token }: { token: string }) => {
 
         let borrowAPR = 0;
         if (optimalUtilization === 1.0 || currentUtilization < optimalUtilization) {
-            console.log("case1")
             const normalizedFactor = currentUtilization / optimalUtilization;
             const optimalBorrowRate = reserveConfig.config.optimalBorrowRate / 100;
             const minBorrowRate = reserveConfig.config.minBorrowRate / 100;
             borrowAPR =
                 normalizedFactor * (optimalBorrowRate - minBorrowRate) + minBorrowRate;
-            console.log(currentUtilization)
-            console.log(optimalUtilization)
-            console.log(normalizedFactor)
-            console.log(optimalBorrowRate)
-            console.log(minBorrowRate)
-            console.log(borrowAPR)
         } else {
-            console.log("case2")
             const normalizedFactor =
                 (currentUtilization - optimalUtilization) / (1 - optimalUtilization);
             const optimalBorrowRate = reserveConfig.config.optimalBorrowRate / 100;

@@ -8,9 +8,10 @@ import { refreshReserveInstruction, refreshObligationInstruction, withdrawObliga
 import { getObligations, getReserves } from "../utils";
 import { BASEURI, WAD } from '../constants';
 import { refreshReserves } from "./refreshReserves";
+import { Config } from "../global";
 
 export const withdraw = async (connection: Connection, publicKey: PublicKey, asset: string, withdrawAmount: number) => {
-    const config = await (await fetch(`${BASEURI}/api/markets`)).json();
+    const config: Config = await (await fetch(`${BASEURI}/api/markets`)).json();
     const instructions = [];
 
     const assetConfig = findWhere(config.assets, { symbol: asset });
@@ -55,14 +56,22 @@ export const withdraw = async (connection: Connection, publicKey: PublicKey, ass
 
 
     const totalBorrowWads = reserveParsed.liquidity.borrowedAmountWads;
-    const totalLiquidityWads = (new BigNumber(reserveParsed.liquidity.availableAmount)).multipliedBy(WAD);
+    const totalLiquidityWads = (new BigNumber(reserveParsed.liquidity.availableAmount));
     const totalDepositWads = totalBorrowWads.plus(totalLiquidityWads);
-    const cTokenExchangeRate = totalDepositWads.dividedBy(new BigNumber(reserveParsed.collateral.mintTotalSupply)).dividedBy(WAD);
+    const cTokenExchangeRate = totalDepositWads.dividedBy(new BigNumber(reserveParsed.collateral.mintTotalSupply));
+    const withdrawCollateralAmount = Number((new BigNumber(withdrawAmount * 10 ** assetConfig.decimals))
+        .dividedBy(cTokenExchangeRate)
+        .integerValue(BigNumber.ROUND_FLOOR).toString())
+
+    console.log("withdrawAmount", withdrawAmount.toString());
+    console.log("totalBorrowWads", totalBorrowWads.toString());
+    console.log("totalLiquidityWads", totalLiquidityWads.toString());
+    console.log("totalDepositWads", totalDepositWads.toString());
+    console.log("cTokenExchangeRate", cTokenExchangeRate.toString());
+    console.log("withdrawCollateralAmount", withdrawCollateralAmount);
 
     instructions.push(withdrawObligationCollateralAndRedeemReserveLiquidity(
-        Number((new BigNumber(withdrawAmount * 10 ** assetConfig.decimals))
-            .dividedBy(cTokenExchangeRate)
-            .integerValue(BigNumber.ROUND_FLOOR).toString()),
+        withdrawCollateralAmount,
         new PublicKey(config.programID),
         new PublicKey(reserveConfig.collateralSupplyAddress),
         userCollateralAccount,
