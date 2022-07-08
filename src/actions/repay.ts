@@ -5,12 +5,11 @@ import { findWhere, find } from "underscore";
 
 import { refreshReserveInstruction, refreshObligationInstruction, repayObligationLiquidityInstruction } from "../models/instructions";
 import { getObligations } from "../utils";
-import { BASEURI } from '../constants';
 import { Config } from '../global';
 import { refreshReserves } from "./refreshReserves";
 
 export const repay = async (connection: Connection, publicKey: PublicKey, asset: string, repayAmount: number) => {
-    const config: Config = await (await fetch(`${BASEURI}/api/markets`)).json();
+    const config: Config = await (await fetch("/api/markets")).json();
     const instructions = [];
 
     const assetConfig = findWhere(config.assets, { symbol: asset });

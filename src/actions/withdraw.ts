@@ -6,12 +6,11 @@ import { BigNumber } from "bignumber.js";
 
 import { refreshReserveInstruction, refreshObligationInstruction, withdrawObligationCollateralAndRedeemReserveLiquidity } from "../models/instructions";
 import { getObligations, getReserves } from "../utils";
-import { BASEURI, WAD } from '../constants';
 import { refreshReserves } from "./refreshReserves";
 import { Config } from "../global";
 
 export const withdraw = async (connection: Connection, publicKey: PublicKey, asset: string, withdrawAmount: number) => {
-    const config: Config = await (await fetch(`${BASEURI}/api/markets`)).json();
+    const config: Config = await (await fetch("/api/markets")).json();
     const instructions = [];
 
     const assetConfig = findWhere(config.assets, { symbol: asset });

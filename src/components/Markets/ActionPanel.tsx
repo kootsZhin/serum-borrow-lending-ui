@@ -7,7 +7,6 @@ import { PublicKey } from '@solana/web3.js';
 import { getReserves, getObligations } from '../../utils';
 import { getTokensOracleData } from "../../pyth";
 import { findWhere, find } from 'underscore';
-import { BASEURI } from '../../constants';
 import { useNotify } from '../../notify';
 import * as actions from "../../actions";
 
@@ -44,7 +43,7 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
     }, [publicKey])
 
     const getUserMetrics = async (publicKey: PublicKey) => {
-        const config = await (await fetch(`${BASEURI}/api/markets`)).json();
+        const config = await (await fetch("/api/markets")).json();
         const tokensOracle = await getTokensOracleData(connection, config, config.markets[0].reserves);
         const allReserves: any = await getReserves(connection, config, config.markets[0].address);
         const allObligation = await getObligations(connection, config, config.markets[0].address);

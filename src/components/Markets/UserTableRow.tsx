@@ -7,7 +7,6 @@ import { TableCell } from "@mui/material"
 
 import { getReserves, getObligations } from '../../utils';
 import { getTokensOracleData } from "../../pyth";
-import { BASEURI } from '../../constants';
 
 const UserTableRow = ({ token }: { token: string }) => {
 
@@ -28,7 +27,7 @@ const UserTableRow = ({ token }: { token: string }) => {
     }, [publicKey])
 
     const getUserMetrics = async (publicKey: PublicKey) => {
-        const config = await (await fetch(`${BASEURI}/api/markets`)).json();
+        const config = await (await fetch("/api/markets")).json();
         const asset = findWhere(config.assets, { symbol: token });
         const tokensOracle = await getTokensOracleData(connection, config, config.markets[0].reserves);
         const allReserves: any = await getReserves(connection, config, config.markets[0].address);

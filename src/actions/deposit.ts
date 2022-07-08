@@ -11,10 +11,9 @@ import {
 
 import { initObligationInstruction, depositReserveLiquidityAndObligationCollateralInstruction } from "../models/instructions"
 import { OBLIGATION_SIZE } from "../models";
-import { BASEURI } from "../constants";
 
 export const deposit = async (connection: Connection, publicKey: PublicKey, asset: string, depositAmount: number) => {
-    const config = await (await fetch(`${BASEURI}/api/markets`)).json();
+    const config = await (await fetch("/api/markets")).json();
     const instructions = [];
 
     const assetConfig = findWhere(config.assets, { symbol: asset });

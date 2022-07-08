@@ -8,7 +8,6 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import { useState, useEffect } from 'react'
-import { BASEURI } from '../../constants'
 import MarketTableRow from './MarketTableRow';
 import UserTableRow from './UserTableRow';
 import ActionsPanel from './ActionPanel';
@@ -55,7 +54,7 @@ export default function Markets() {
 
     async function getMarkets() {
 
-        const res = await fetch(`${BASEURI}/api/markets`);
+        const res = await fetch("/api/markets");
         const config = await res.json()
 
         let markets: any = [];

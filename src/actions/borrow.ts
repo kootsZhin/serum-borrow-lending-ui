@@ -10,14 +10,13 @@ import {
 } from '@solana/spl-token';
 
 import { refreshReserveInstruction, refreshObligationInstruction, borrowObligationLiquidityInstruction } from '../models/instructions';
-import { BASEURI } from '../constants';
 import { getObligations } from '../utils';
 import { getReserves } from '../utils';
 import { Config } from '../global';
 import { refreshReserves } from './refreshReserves';
 
 export const borrow = async (connection: Connection, publicKey: PublicKey, asset: string, withdrawAmount: number) => {
-    const config: Config = await (await fetch(`${BASEURI}/api/markets`)).json();
+    const config: Config = await (await fetch("/api/markets")).json();
     const instructions = [];
 
     const assetConfig = findWhere(config.assets, { symbol: asset });

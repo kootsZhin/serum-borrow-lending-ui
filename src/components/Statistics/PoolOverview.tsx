@@ -5,7 +5,6 @@ import { getTokensOracleData } from "../../pyth";
 import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { findWhere, find } from 'underscore';
 import { getReserves } from '../../utils';
-import { BASEURI } from '../../constants';
 import { PublicKey, Connection, clusterApiUrl } from "@solana/web3.js";
 import { assert } from "console";
 
@@ -22,7 +21,7 @@ const PoolOverview = () => {
     const getPoolMetrics = async () => {
         const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 
-        const config = await (await fetch(`${BASEURI}/api/markets`)).json();
+        const config = await (await fetch("/api/markets")).json();
 
         let totalDepositValue = 0;
         let totalBorrowValue = 0;

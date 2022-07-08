@@ -5,7 +5,6 @@ import { TableCell } from "@mui/material"
 
 import { getTokensOracleData } from "../../pyth";
 import { getReserves } from '../../utils';
-import { BASEURI } from '../../constants';
 
 const MarketTableRow = ({ token }: { token: string }) => {
 
@@ -26,7 +25,7 @@ const MarketTableRow = ({ token }: { token: string }) => {
     const getPoolMetrics = async () => {
         const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 
-        const config = await (await fetch(`${BASEURI}/api/markets`)).json();
+        const config = await (await fetch("/api/markets")).json();
         const asset = findWhere(config.assets, { symbol: token });
         const tokensOracle = await getTokensOracleData(connection, config, config.markets[0].reserves);
         const allReserves: any = await getReserves(connection, config, config.markets[0].address);

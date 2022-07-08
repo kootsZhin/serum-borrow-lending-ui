@@ -6,7 +6,6 @@ import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { getReserves, getObligations } from '../../utils';
 import { getTokensOracleData } from "../../pyth";
 import { findWhere, find } from 'underscore';
-import { BASEURI } from '../../constants';
 
 const UserPlatformAssets = () => {
     const [deposited, setDeposited] = useState("-");
@@ -22,7 +21,7 @@ const UserPlatformAssets = () => {
     }, [publicKey])
 
     const getUserMetrics = async (publicKey: PublicKey) => {
-        const config = await (await fetch(`${BASEURI}/api/markets`)).json();
+        const config = await (await fetch("/api/markets")).json();
         const tokensOracle = await getTokensOracleData(connection, config, config.markets[0].reserves);
         const allReserves: any = await getReserves(connection, config, config.markets[0].address);
         const allObligation = await getObligations(connection, config, config.markets[0].address);
