@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { ActionsPanel } from "./ActionsPanel";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react"
 import { findWhere, find } from "underscore";
-import { PublicKey } from "@solana/web3.js";
+import { PublicKey, Connection, clusterApiUrl } from "@solana/web3.js";
 import { getTokensOracleData } from "../../pyth";
 import { getAssociatedTokenAddress, TokenAccountNotFoundError, TokenInvalidAccountOwnerError } from '@solana/spl-token';
 import { getReserves, getObligations } from '../../utils';
@@ -18,6 +18,11 @@ const SingleMarketMetrics = ({ token }: { token: string }) => {
     };
     const handleClose = () => {
         setOpen(false);
+
+        getReserveMetrics();
+        if (publicKey) {
+            getUserMetrics(publicKey);
+        }
     };
 
     // Get the market data
@@ -40,12 +45,16 @@ const SingleMarketMetrics = ({ token }: { token: string }) => {
     const { publicKey } = useWallet();
 
     useEffect(() => {
+        getReserveMetrics();
         if (publicKey) {
-            getReserveMetrics(publicKey);
+            getUserMetrics(publicKey);
         }
     }, [publicKey])
 
-    const getReserveMetrics = async (publicKey: PublicKey) => {
+    const getReserveMetrics = async () => {
+        console.log("Getting reserve metrics for: " + token);
+        const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
+
         const config = await (await fetch(`${BASEURI}/api/markets`)).json();
         const asset = findWhere(config.assets, { symbol: token });
         const tokensOracle = await getTokensOracleData(connection, config, config.markets[0].reserves);
@@ -84,6 +93,28 @@ const SingleMarketMetrics = ({ token }: { token: string }) => {
 
         const depositAPR = borrowAPR * currentUtilization;
 
+        setTotalAvailable(availableAmount.toFixed(2).toString());
+        setTotalAvailableValue(availableAmountValue.toFixed(2).toString());
+
+        setTotalBorrow(totalBorrowedAmount.toFixed(2).toString());
+        setTotalBorrowValue(totalBorrowedAmountValue.toFixed(2).toString());
+
+        setTotalDeposit(totalDeposit.toFixed(2).toString());
+        setTotalDepositValue(totalDepositValue.toFixed(2).toString());
+
+        setborrowAPR((borrowAPR * 100).toFixed(2).toString());
+        setdepositAPR((depositAPR * 100).toFixed(2).toString());
+    }
+
+    const getUserMetrics = async (publicKey: PublicKey) => {
+        const config = await (await fetch(`${BASEURI}/api/markets`)).json();
+        const asset = findWhere(config.assets, { symbol: token });
+        const tokensOracle = await getTokensOracleData(connection, config, config.markets[0].reserves);
+        const allReserves: any = await getReserves(connection, config, config.markets[0].address);
+        const tokenOracle = findWhere(tokensOracle, { symbol: asset.symbol });
+        const reserve = findWhere(config.markets[0].reserves, { asset: asset.symbol });
+        const reserveConfig = find(allReserves, (r) => r!.pubkey.toString() === reserve.address)!.data;
+
         const tokenAddress = await getAssociatedTokenAddress(new PublicKey(asset.mintAddress), publicKey);
         let tokenAssetsBalance = 0;
         try {
@@ -110,18 +141,6 @@ const SingleMarketMetrics = ({ token }: { token: string }) => {
             borrowedBalance = userBorrow ? Number(userBorrow.borrowedAmountWads.toString()) / 10 ** reserveConfig.liquidity.mintDecimals : 0;
             borrowedBalanceValue = borrowedBalance * tokenOracle.price;
         }
-
-        setTotalAvailable(availableAmount.toFixed(2).toString());
-        setTotalAvailableValue(availableAmountValue.toFixed(2).toString());
-
-        setTotalBorrow(totalBorrowedAmount.toFixed(2).toString());
-        setTotalBorrowValue(totalBorrowedAmountValue.toFixed(2).toString());
-
-        setTotalDeposit(totalDeposit.toFixed(2).toString());
-        setTotalDepositValue(totalDepositValue.toFixed(2).toString());
-
-        setborrowAPR((borrowAPR * 100).toFixed(2).toString());
-        setdepositAPR((depositAPR * 100).toFixed(2).toString());
 
         setUserBalance(tokenAssetsBalance.toFixed(2).toString());
         setUserBalanceValue((tokenAssetsBalance * tokenOracle.price)!.toFixed(2).toString());
