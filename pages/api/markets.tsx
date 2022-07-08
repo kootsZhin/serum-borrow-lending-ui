@@ -14,8 +14,8 @@ export default function handler(
             "programID": `${process.env.PROGRAM_ID}`,
             "assets": [
                 {
-                    "name": "USD coin",
-                    "symbol": "USDC",
+                    "name": "Bitcon",
+                    "symbol": "BTC",
                     "decimals": Number(`${process.env.USDC_DECIMAL}`),
                     "mintAddress": `${process.env.USDC_ADDR}`,
                 },
@@ -32,7 +32,7 @@ export default function handler(
                     "address": `${process.env.MARKET_ADDR}`,
                     "reserves": [
                         {
-                            "asset": "USDC",
+                            "asset": "BTC",
                             "address": `${process.env.USDC_RESERVE_ADDR}`,
                             "collateralMintAddress": `${process.env.USDC_COLLATERAL_MINT_ADDR}`,
                             "collateralSupplyAddress": `${process.env.USDC_COLLATERAL_SUPPLY_ADDR}`,
@@ -54,7 +54,7 @@ export default function handler(
                 "pythProgramID": "gSbePebfvPy7tRqimPoVecS2UsBvYv46ynrzWocc92s",
                 "assets": [
                     {
-                        "asset": "USDC",
+                        "asset": "BTC",
                         "priceAddress": "HovQMDrbAgAYPCmHVSrezcSmkMtXSSUsLDFANExrZh2J" // 5SSkXsEKQepHHAewytPVwdej4epN1nxgLVM84L4KXgy7 using BTC oracle for better stability
                     },
                     {
