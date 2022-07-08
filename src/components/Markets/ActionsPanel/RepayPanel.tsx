@@ -6,6 +6,8 @@ import { Transaction } from '@solana/web3.js';
 import { useCallback, useState } from 'react';
 
 import { repay } from '../../../actions';
+import { useNotify } from '../../../notify';
+import { sendAndNotifyTransactions } from '../../../actions/sendAndNotifyTransactions';
 
 export function RepayPanel(props: { index: number, asset: string, value: number }) {
     const { value, asset, index, ...other } = props;
@@ -14,17 +16,15 @@ export function RepayPanel(props: { index: number, asset: string, value: number 
 
     const [repayAmount, setRepayAmount] = useState(0);
 
+    const notify = useNotify();
+
     const onClick = useCallback(async () => {
         if (!publicKey) throw new WalletNotConnectedError();
 
         const instructions = await repay(connection, publicKey, asset, repayAmount);
+        sendAndNotifyTransactions(connection, sendTransaction, notify, instructions);
 
-        const tx = new Transaction().add(...instructions);
-
-        const signature = await sendTransaction(tx, connection);
-        await connection.confirmTransaction(signature, "processed");
-
-    }, [repayAmount, publicKey, sendTransaction, connection]);
+    }, [repayAmount, publicKey, sendTransaction, connection, notify]);
 
     return (
         <div

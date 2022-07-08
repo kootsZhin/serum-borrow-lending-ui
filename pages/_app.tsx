@@ -16,6 +16,7 @@ import {
 } from '@solana/wallet-adapter-react-ui';
 import { clusterApiUrl } from '@solana/web3.js';
 import { createDefaultAuthorizationResultCache, SolanaMobileWalletAdapter } from '@solana-mobile/wallet-adapter-mobile';
+import { SnackbarProvider } from 'notistack';
 
 // Default styles that can be overridden by your app
 require('@solana/wallet-adapter-react-ui/styles.css');
@@ -46,6 +47,8 @@ function MyApp({ Component, pageProps }: AppProps) {
             new GlowWalletAdapter(),
             new SlopeWalletAdapter(),
             new SolflareWalletAdapter({ network }),
+            new SolletWalletAdapter({ network }),
+            new SolletExtensionWalletAdapter({ network }),
             new TorusWalletAdapter(),
         ],
         [network]
@@ -55,11 +58,13 @@ function MyApp({ Component, pageProps }: AppProps) {
         <ConnectionProvider endpoint={endpoint}>
             <WalletProvider wallets={wallets} autoConnect>
                 <WalletModalProvider>
-                    <Header />
-                    <Component {...pageProps} />
+                    <SnackbarProvider>
+                        <Header />
+                        <Component {...pageProps} />
+                    </SnackbarProvider>
                 </WalletModalProvider>
             </WalletProvider>
-        </ConnectionProvider>
+        </ConnectionProvider >
     )
 }
 

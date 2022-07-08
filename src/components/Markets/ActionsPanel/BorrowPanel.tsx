@@ -5,6 +5,8 @@ import { useCallback, useState } from 'react';
 import { Transaction } from '@solana/web3.js';
 
 import { borrow } from '../../../actions';
+import { useNotify } from '../../../notify';
+import { sendAndNotifyTransactions } from '../../../actions/sendAndNotifyTransactions';
 
 export function BorrowPanel(props: { index: number, asset: string, value: number }) {
     const { value, asset, index, ...other } = props;
@@ -12,18 +14,15 @@ export function BorrowPanel(props: { index: number, asset: string, value: number
     const { publicKey, sendTransaction } = useWallet();
 
     const [withdrawAmount, setWithdrawAmount] = useState(0);
+    const notify = useNotify();
 
     const onClick = useCallback(async () => {
         if (!publicKey) throw new WalletNotConnectedError();
 
         const instructions = await borrow(connection, publicKey, asset, withdrawAmount);
+        sendAndNotifyTransactions(connection, sendTransaction, notify, instructions);
 
-        const tx = new Transaction().add(...instructions);
-
-        const signature = await sendTransaction(tx, connection);
-        await connection.confirmTransaction(signature, "processed");
-
-    }, [withdrawAmount, publicKey, sendTransaction, connection]);
+    }, [withdrawAmount, publicKey, sendTransaction, connection, notify]);
 
     return (
         <div
