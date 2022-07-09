@@ -3,13 +3,15 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import { useConnection, useWallet } from "@solana/wallet-adapter-react"
 import { useCallback, useState, useEffect } from 'react';
 import { WalletNotConnectedError } from '@solana/wallet-adapter-base';
-import { PublicKey } from '@solana/web3.js';
+import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { getAssociatedTokenAddress } from '@solana/spl-token';
 
 import { getReserves, getObligations } from '../../utils';
 import { getTokensOracleData } from "../../pyth";
 import { findWhere, find } from 'underscore';
 import { useNotify } from '../../notify';
 import * as actions from "../../actions";
+import { WRAPPED_SOL_MINT } from '../../constants';
 
 import { sendAndNotifyTransactions } from '../../actions/sendAndNotifyTransactions';
 import { Config } from '../../global';
@@ -33,14 +35,15 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
 
     const [deposited, setDeposited] = useState(0);
     const [borrowed, setBorrowed] = useState(0);
+    const [amount, setAmount] = useState(0);
 
-    const [userTokenBalance, setUserTokenBalance] = useState(0);
-    const [userTokenDeposit, setUserTokenDeposit] = useState(0);
+    const [userDepositMax, setUserDepositMax] = useState(0);
+    const [userRepaytMax, setUserRepaytMax] = useState(0);
+    const [userWithdrawMax, setUserWithdrawtMax] = useState(0);
+    const [userBorrowMax, setUserBorrowMax] = useState(0);
 
     const { connection } = useConnection();
     const { publicKey, sendTransaction } = useWallet();
-
-    const [amount, setAmount] = useState(0);
 
     useEffect(() => {
         if (publicKey) {
@@ -63,7 +66,6 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
         let userDepositedValue = 0;
         let userBorrowedValue = 0;
         if (userObligation) {
-
             for (const reserve of allReserves) {
 
                 const userDepositedToken = find(userObligation.data.deposits, (r) => r!.depositReserve.toBase58() === reserve.pubkey.toBase58());
@@ -78,8 +80,24 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
                 userDepositedValue += userDepositedTokenBalanceValue;
                 userBorrowedValue += userBorrowedTokenBalanceValue;
 
+
                 if (reserve.pubkey.toBase58() === reserveConfig.pubkey.toBase58()) {
-                    setUserTokenDeposit(userDepositedTokenBalance)
+                    let tokenAssetsBalance;
+                    if (reserve.data.liquidity.supplyPubkey === WRAPPED_SOL_MINT) {
+                        const tokenAddress = await getAssociatedTokenAddress(new PublicKey(reserve.data.liquidity.supplyPubkey), publicKey);
+                        try {
+                            tokenAssetsBalance = await (await connection.getTokenAccountBalance(tokenAddress)).value.uiAmount;
+                        } catch (error: unknown) {
+                            tokenAssetsBalance = 0;
+                        }
+                    } else {
+                        tokenAssetsBalance = Number((await connection.getBalance(publicKey)).toString()) / LAMPORTS_PER_SOL;
+                    }
+
+                    setUserDepositMax(tokenAssetsBalance);
+                    setUserRepaytMax(userBorrowedValue > tokenAssetsBalance ? tokenAssetsBalance : userBorrowedValue);
+                    setUserWithdrawtMax(0);
+                    setUserBorrowMax(0); //TODO
                 }
             }
         }
@@ -117,14 +135,39 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
     }
 
     const handleInputChange = (event) => {
-        setAmount(Number(event.target.value))
-        Number(event.target.value) ? setDisplayAmount(Number(event.target.value).toString()) : setDisplayAmount("")
-        Number(event.target.value) ? setOnClickDisable(false) : setOnClickDisable(true)
+        _handleInputChange(Number(event.target.value));
+    }
+
+    const _handleInputChange = (inputValue) => {
+        setAmount(inputValue)
+        inputValue ? setDisplayAmount(inputValue.toString()) : setDisplayAmount("")
+        inputValue ? setOnClickDisable(false) : setOnClickDisable(true)
     }
 
     const useMax = () => {
-        setDisplayAmount(userTokenDeposit.toString());
-        setAmount(userTokenDeposit);
+        let max;
+        switch (value) {
+            case 0:
+                max = userDepositMax
+                break;
+            case 1:
+                max = userRepaytMax
+                break;
+            case 2:
+                max = userWithdrawMax
+                break;
+            case 3:
+                max = userBorrowMax
+                break;
+            default:
+                break
+        }
+
+        if (!max) {
+            notify("info", `Your max ${idToActions[value]} value equals to ${max}`);
+        }
+
+        _handleInputChange(max);
     }
 
     const notify = useNotify();
@@ -179,7 +222,16 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
             >
                 <Box sx={{ p: 3 }}>
                     <Stack spacing={2}>
-                        <TextField id="outlined-basic" label={`Enter ${asset} Amount`} variant="outlined" onChange={handleInputChange} required />
+                        <TextField
+                            label={`Enter ${asset} Amount`}
+                            variant="outlined"
+                            onChange={handleInputChange}
+                            value={amount ? amount : null}
+                            required
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                        />
                         <Button variant="outlined" onClick={useMax}>Use max</Button>
                         <Table>
                             <TableBody>

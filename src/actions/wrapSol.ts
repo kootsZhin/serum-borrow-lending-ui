@@ -1,9 +1,6 @@
 import { ACCOUNT_SIZE, TOKEN_PROGRAM_ID, getMinimumBalanceForRentExemptAccount, createInitializeAccountInstruction } from "@solana/spl-token";
 import { LAMPORTS_PER_SOL, SystemProgram, Keypair, PublicKey } from "@solana/web3.js"
-
-const WRAPPED_SOL_MINT = new PublicKey(
-    "So11111111111111111111111111111111111111112"
-);
+import { WRAPPED_SOL_MINT } from "../constants";
 
 export const wrapSol = async (connection, publicKey, amount) => {
     const wrappedSolAccount = Keypair.generate();
