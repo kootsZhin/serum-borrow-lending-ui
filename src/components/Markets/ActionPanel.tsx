@@ -1,4 +1,5 @@
-import { Dialog, Box, Tabs, Tab, TextField, Stack, Button, TableCell, Table, TableBody, TableRow } from '@mui/material';
+import { Dialog, Box, Tabs, Tab, TextField, Stack, Button, TableCell, Table, TableBody, TableRow, Grid } from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
 import { useConnection, useWallet } from "@solana/wallet-adapter-react"
 import { useCallback, useState, useEffect } from 'react';
 import { WalletNotConnectedError } from '@solana/wallet-adapter-base';
@@ -11,6 +12,7 @@ import { useNotify } from '../../notify';
 import * as actions from "../../actions";
 
 import { sendAndNotifyTransactions } from '../../actions/sendAndNotifyTransactions';
+import { Config } from '../../global';
 
 function a11yProps(index: number) {
     return {
@@ -23,13 +25,17 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
     const { onClose, asset, open } = props;
     const [value, setValue] = useState(0);
     const [displayAmount, setDisplayAmount] = useState("");
-    const [onClickDisable, setOnClickDisable] = useState(false);
+    const [onClickDisable, setOnClickDisable] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
 
     const [userBorrowLimit, setUserBorrowLimit] = useState(0);
     const [utilization, setUtilizatoin] = useState(0);
 
     const [deposited, setDeposited] = useState(0);
     const [borrowed, setBorrowed] = useState(0);
+
+    const [userTokenBalance, setUserTokenBalance] = useState(0);
+    const [userTokenDeposit, setUserTokenDeposit] = useState(0);
 
     const { connection } = useConnection();
     const { publicKey, sendTransaction } = useWallet();
@@ -43,14 +49,14 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
     }, [publicKey])
 
     const getUserMetrics = async (publicKey: PublicKey) => {
-        const config = await (await fetch("/api/markets")).json();
+        const config: Config = await (await fetch("/api/markets")).json();
         const tokensOracle = await getTokensOracleData(connection, config, config.markets[0].reserves);
-        const allReserves: any = await getReserves(connection, config, config.markets[0].address);
+        const allReserves = await getReserves(connection, config, config.markets[0].address);
         const allObligation = await getObligations(connection, config, config.markets[0].address);
         const reserve = findWhere(config.markets[0].reserves, { asset: asset });
-        const reserveConfig = find(allReserves, (r) => r!.pubkey.toString() === reserve.address)!.data;
+        const reserveConfig = find(allReserves, (r) => r!.pubkey.toString() === reserve.address)!;
 
-        const loanToValue = reserveConfig.config.loanToValueRatio / 100;
+        const loanToValue = reserveConfig.data.config.loanToValueRatio / 100;
 
         const userObligation = find(allObligation, (r) => r!.data.owner.toBase58() === publicKey.toBase58());
 
@@ -59,6 +65,7 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
         if (userObligation) {
 
             for (const reserve of allReserves) {
+
                 const userDepositedToken = find(userObligation.data.deposits, (r) => r!.depositReserve.toBase58() === reserve.pubkey.toBase58());
                 const userDepositedTokenBalance = userDepositedToken ? Number(userDepositedToken.depositedAmount.toString()) / 10 ** reserve.data.liquidity.mintDecimals : 0;
                 const tokenOracle = findWhere(tokensOracle, { reserveAddress: reserve.pubkey.toBase58() });
@@ -70,6 +77,10 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
 
                 userDepositedValue += userDepositedTokenBalanceValue;
                 userBorrowedValue += userBorrowedTokenBalanceValue;
+
+                if (reserve.pubkey.toBase58() === reserveConfig.pubkey.toBase58()) {
+                    setUserTokenDeposit(userDepositedTokenBalance)
+                }
             }
         }
 
@@ -90,7 +101,11 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
     };
 
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-        setOnClickDisable(false);
+        if (displayAmount === "") {
+            setOnClickDisable(true);
+        } else {
+            setOnClickDisable(false);
+        }
         setValue(newValue);
     };
 
@@ -104,12 +119,21 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
     const handleInputChange = (event) => {
         setAmount(Number(event.target.value))
         Number(event.target.value) ? setDisplayAmount(Number(event.target.value).toString()) : setDisplayAmount("")
+        Number(event.target.value) ? setOnClickDisable(false) : setOnClickDisable(true)
+    }
+
+    const useMax = () => {
+        setDisplayAmount(userTokenDeposit.toString());
+        setAmount(userTokenDeposit);
     }
 
     const notify = useNotify();
 
     const onClick = useCallback(async () => {
         if (!publicKey) throw new WalletNotConnectedError();
+
+        setOnClickDisable(true);
+        setIsLoading(true);
 
         let instructions = [];
         let signers = undefined;
@@ -130,7 +154,10 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
                 break
         }
 
-        sendAndNotifyTransactions(connection, sendTransaction, notify, instructions, signers);
+        await sendAndNotifyTransactions(connection, sendTransaction, notify, instructions, signers);
+
+        setOnClickDisable(false);
+        setIsLoading(false);
 
     }, [amount, publicKey, sendTransaction, connection, notify, value]);
 
@@ -152,7 +179,8 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
             >
                 <Box sx={{ p: 3 }}>
                     <Stack spacing={2}>
-                        <TextField id="outlined-basic" label={`Enter ${asset} Amount`} variant="outlined" onChange={handleInputChange} />
+                        <TextField id="outlined-basic" label={`Enter ${asset} Amount`} variant="outlined" onChange={handleInputChange} required />
+                        <Button variant="outlined" onClick={useMax}>Use max</Button>
                         <Table>
                             <TableBody>
                                 <TableRow>
@@ -165,13 +193,17 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
                                 </TableRow>
                             </TableBody>
                         </Table>
-                        <Button disabled={!publicKey || onClickDisable} variant="contained" onClick={onClick}>
+                        <LoadingButton
+                            disabled={!publicKey || onClickDisable}
+                            loading={isLoading}
+                            variant="contained"
+                            onClick={onClick}>
                             {
                                 publicKey ?
                                     `${idToActions[value]} ${displayAmount} ${asset}`
                                     : "Connect Wallet"
                             }
-                        </Button>
+                        </LoadingButton>
                     </Stack>
                 </Box>
             </div >
