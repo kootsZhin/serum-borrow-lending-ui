@@ -1,4 +1,4 @@
-import { getAssociatedTokenAddress } from "@solana/spl-token";
+import { getAssociatedTokenAddress, createCloseAccountInstruction } from "@solana/spl-token";
 import { Connection } from '@solana/web3.js';
 import { PublicKey } from "@solana/web3.js";
 import { findWhere, find } from "underscore";
@@ -8,10 +8,19 @@ import { refreshReserveInstruction, refreshObligationInstruction, withdrawObliga
 import { getObligations, getReserves } from "../utils";
 import { refreshReserves } from "./refreshReserves";
 import { Config } from "../global";
+import { wrapSol } from './wrapSol';
 
 export const withdraw = async (connection: Connection, publicKey: PublicKey, asset: string, withdrawAmount: number) => {
     const config: Config = await (await fetch("/api/markets")).json();
-    const instructions = [];
+
+    let instructions;
+    let signers;
+    if (asset === "SOL" || asset === "WSOL") {
+        ({ instructions, signers } = await wrapSol(connection, publicKey, withdrawAmount));
+    } else {
+        instructions = [];
+        signers = undefined;
+    }
 
     const assetConfig = findWhere(config.assets, { symbol: asset });
     const reserveConfig = findWhere(config.markets[0].reserves, { asset: asset });
@@ -28,7 +37,7 @@ export const withdraw = async (connection: Connection, publicKey: PublicKey, ass
     }
 
     const userCollateralAccount = await getAssociatedTokenAddress(new PublicKey(reserveConfig.collateralMintAddress), publicKey);
-    const userLiquidityAccount = await getAssociatedTokenAddress(new PublicKey(assetConfig.mintAddress), publicKey);
+    const userLiquidityAccount = signers ? signers[0].publicKey : await getAssociatedTokenAddress(new PublicKey(assetConfig.mintAddress), publicKey);
 
     const allReserves: any = await getReserves(connection, config, config.markets[0].address);
     const reserveParsed = find(allReserves, (r) => r!.pubkey.toString() === reserveConfig.address)!.data;
@@ -53,12 +62,11 @@ export const withdraw = async (connection: Connection, publicKey: PublicKey, ass
         userBorrowedReserves,
     ))
 
-
     const totalBorrowWads = reserveParsed.liquidity.borrowedAmountWads;
     const totalLiquidityWads = (new BigNumber(reserveParsed.liquidity.availableAmount));
     const totalDepositWads = totalBorrowWads.plus(totalLiquidityWads);
     const cTokenExchangeRate = totalDepositWads.dividedBy(new BigNumber(reserveParsed.collateral.mintTotalSupply));
-    const withdrawCollateralAmount = Number((new BigNumber(withdrawAmount * 10 ** assetConfig.decimals))
+    const withdrawCollateralAmount = Number((new BigNumber(Math.floor(withdrawAmount * 10 ** assetConfig.decimals)))
         .dividedBy(cTokenExchangeRate)
         .integerValue(BigNumber.ROUND_FLOOR).toString())
 
@@ -78,5 +86,14 @@ export const withdraw = async (connection: Connection, publicKey: PublicKey, ass
         publicKey
     ))
 
-    return instructions;
+    if (signers) {
+        instructions.push(createCloseAccountInstruction(
+            signers[0].publicKey,
+            publicKey,
+            publicKey
+        ));
+    }
+
+
+    return { instructions, signers };
 }

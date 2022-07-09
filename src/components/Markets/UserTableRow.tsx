@@ -2,7 +2,7 @@ import { useConnection, useWallet } from "@solana/wallet-adapter-react"
 import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { useState, useEffect } from "react";
 import { findWhere, find } from "underscore";
-import { PublicKey } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { TableCell } from "@mui/material"
 
 import { getReserves, getObligations } from '../../utils';
@@ -35,12 +35,16 @@ const UserTableRow = ({ token }: { token: string }) => {
         const reserve = findWhere(config.markets[0].reserves, { asset: asset.symbol });
         const reserveConfig = find(allReserves, (r) => r!.pubkey.toString() === reserve.address)!.data;
 
-        const tokenAddress = await getAssociatedTokenAddress(new PublicKey(asset.mintAddress), publicKey);
         let tokenAssetsBalance = 0;
-        try {
-            tokenAssetsBalance = await (await connection.getTokenAccountBalance(tokenAddress)).value.uiAmount;
-        } catch (error: unknown) {
-            tokenAssetsBalance = 0;
+        if (!(token == "SOL" || token == "WSOL")) {
+            const tokenAddress = await getAssociatedTokenAddress(new PublicKey(asset.mintAddress), publicKey);
+            try {
+                tokenAssetsBalance = await (await connection.getTokenAccountBalance(tokenAddress)).value.uiAmount;
+            } catch (error: unknown) {
+                tokenAssetsBalance = 0;
+            }
+        } else {
+            tokenAssetsBalance = Number((await connection.getBalance(publicKey)).toString()) / LAMPORTS_PER_SOL;
         }
 
         const allObligation = await getObligations(connection, config, config.markets[0].address);

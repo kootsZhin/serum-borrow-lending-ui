@@ -4,6 +4,7 @@ import { findWhere } from "underscore";
 import {
     getAssociatedTokenAddress,
     createAssociatedTokenAccountInstruction,
+    createCloseAccountInstruction,
     getAccount,
     TokenAccountNotFoundError,
     TokenInvalidAccountOwnerError
@@ -11,14 +12,23 @@ import {
 
 import { initObligationInstruction, depositReserveLiquidityAndObligationCollateralInstruction } from "../models/instructions"
 import { OBLIGATION_SIZE } from "../models";
+import { wrapSol } from './wrapSol';
 
 export const deposit = async (connection: Connection, publicKey: PublicKey, asset: string, depositAmount: number) => {
     const config = await (await fetch("/api/markets")).json();
-    const instructions = [];
 
     const assetConfig = findWhere(config.assets, { symbol: asset });
     const reserveConfig = findWhere(config.markets[0].reserves, { asset: asset });
     const oracleConfig = findWhere(config.oracles.assets, { asset: asset });
+
+    let instructions;
+    let signers;
+    if (asset === "SOL" || asset === "WSOL") {
+        ({ instructions, signers } = await wrapSol(connection, publicKey, depositAmount));
+    } else {
+        instructions = [];
+        signers = undefined;
+    }
 
     // Get or create the token account for collateral token
     const sourceCollateral = await getAssociatedTokenAddress(new PublicKey(reserveConfig!.collateralMintAddress), publicKey);
@@ -40,7 +50,7 @@ export const deposit = async (connection: Connection, publicKey: PublicKey, asse
         new PublicKey(config.programID)
     );
 
-    const sourceLiquidity = await getAssociatedTokenAddress(new PublicKey(assetConfig.mintAddress), publicKey);
+    const sourceLiquidity = signers ? signers[0].publicKey : await getAssociatedTokenAddress(new PublicKey(assetConfig.mintAddress), publicKey);
 
     // Get or create the obligation account
     const seed = config.markets[0].address.slice(0, 32);
@@ -68,7 +78,7 @@ export const deposit = async (connection: Connection, publicKey: PublicKey, asse
 
     // Deposit Reserve Liquidity and Obligation Collateral
     instructions.push(depositReserveLiquidityAndObligationCollateralInstruction(
-        depositAmount * 10 ** assetConfig.decimals,
+        Math.floor(depositAmount * 10 ** assetConfig.decimals),
         new PublicKey(config.programID),
         sourceLiquidity,
         sourceCollateral,
@@ -84,5 +94,13 @@ export const deposit = async (connection: Connection, publicKey: PublicKey, asse
         publicKey
     ));
 
-    return instructions;
+    if (signers) {
+        instructions.push(createCloseAccountInstruction(
+            signers[0].publicKey,
+            publicKey,
+            publicKey
+        ));
+    }
+
+    return { instructions, signers };
 }

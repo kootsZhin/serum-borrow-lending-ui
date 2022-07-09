@@ -4,6 +4,7 @@ import { findWhere, find } from 'underscore';
 import {
     getAssociatedTokenAddress,
     createAssociatedTokenAccountInstruction,
+    createCloseAccountInstruction,
     getAccount,
     TokenAccountNotFoundError,
     TokenInvalidAccountOwnerError
@@ -14,10 +15,19 @@ import { getObligations } from '../utils';
 import { getReserves } from '../utils';
 import { Config } from '../global';
 import { refreshReserves } from './refreshReserves';
+import { wrapSol } from './wrapSol';
 
 export const borrow = async (connection: Connection, publicKey: PublicKey, asset: string, withdrawAmount: number) => {
     const config: Config = await (await fetch("/api/markets")).json();
-    const instructions = [];
+    console.log("borrow")
+    let instructions;
+    let signers;
+    if (asset === "SOL" || asset === "WSOL") {
+        ({ instructions, signers } = await wrapSol(connection, publicKey, withdrawAmount));
+    } else {
+        instructions = [];
+        signers = undefined;
+    }
 
     const assetConfig = findWhere(config.assets, { symbol: asset });
     const reserveConfig = findWhere(config.markets[0].reserves, { asset: asset });
@@ -33,11 +43,12 @@ export const borrow = async (connection: Connection, publicKey: PublicKey, asset
         userObligation.data.borrows.forEach((borrow) => { userBorrowedReserves.push(borrow.borrowReserve) });
     }
 
-    const userLiquidityAccount = await getAssociatedTokenAddress(new PublicKey(assetConfig.mintAddress), publicKey);
+    const userLiquidityAccount = signers ? signers[0].publicKey : await getAssociatedTokenAddress(new PublicKey(assetConfig.mintAddress), publicKey);
     try {
         await getAccount(connection, userLiquidityAccount);
     } catch (error: unknown) {
-        if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
+        console.log(error);
+        if (!(asset === "SOL" || asset === "WSOL") && (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError)) {
             instructions.push(createAssociatedTokenAccountInstruction(
                 publicKey,
                 userLiquidityAccount,
@@ -68,7 +79,7 @@ export const borrow = async (connection: Connection, publicKey: PublicKey, asset
     ))
 
     instructions.push(borrowObligationLiquidityInstruction(
-        withdrawAmount * 10 ** assetConfig.decimals,
+        Math.floor(withdrawAmount * 10 ** assetConfig.decimals),
         new PublicKey(config.programID),
         new PublicKey(reserveConfig.liquidityAddress),
         userLiquidityAccount,
@@ -80,5 +91,13 @@ export const borrow = async (connection: Connection, publicKey: PublicKey, asset
         publicKey
     ))
 
-    return instructions;
+    if (signers) {
+        instructions.push(createCloseAccountInstruction(
+            signers[0].publicKey,
+            publicKey,
+            publicKey
+        ));
+    }
+
+    return { instructions, signers };
 }

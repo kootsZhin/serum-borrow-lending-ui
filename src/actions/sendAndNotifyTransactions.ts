@@ -1,9 +1,9 @@
 import { Transaction } from '@solana/web3.js';
 
-export const sendAndNotifyTransactions = async (connection, sendTransaction, notify, instructions) => {
+export const sendAndNotifyTransactions = async (connection, sendTransaction, notify, instructions, signers?) => {
     try {
         const tx = new Transaction().add(...instructions);
-        const signature = await sendTransaction(tx, connection);
+        const signature = await sendTransaction(tx, connection, { signers: signers });
 
         notify('info', 'Transaction sent:', signature);
 

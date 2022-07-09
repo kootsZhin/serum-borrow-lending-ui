@@ -18,7 +18,7 @@ export default function handler(
                 },
                 {
                     "name": "Wrapped SOL",
-                    "symbol": "WSOL",
+                    "symbol": "SOL",
                     "decimals": Number(`${process.env.NEXT_PUBLIC_WRAPPED_SOL_DECIMAL}`),
                     "mintAddress": `${process.env.NEXT_PUBLIC_WRAPPED_SOL_ADDR}`,
                 }
@@ -37,7 +37,7 @@ export default function handler(
                             "liquidityFeeReceiverAddress": `${process.env.NEXT_PUBLIC_USDC_RESERVE_LIQUIDITY_FEE_RECEIVER_ADDR}`
                         },
                         {
-                            "asset": "WSOL",
+                            "asset": "SOL",
                             "address": `${process.env.NEXT_PUBLIC_WRAPPED_SOL_RESERVE_ADDR}`,
                             "collateralMintAddress": `${process.env.NEXT_PUBLIC_WRAPPED_SOL_COLLATERAL_MINT_ADDR}`,
                             "collateralSupplyAddress": `${process.env.NEXT_PUBLIC_WRAPPED_SOL_COLLATERAL_SUPPLY_ADDR}`,
@@ -55,7 +55,7 @@ export default function handler(
                         "priceAddress": "HovQMDrbAgAYPCmHVSrezcSmkMtXSSUsLDFANExrZh2J" // 5SSkXsEKQepHHAewytPVwdej4epN1nxgLVM84L4KXgy7 using BTC oracle for better stability
                     },
                     {
-                        "asset": "WSOL",
+                        "asset": "SOL",
                         "priceAddress": "J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix"
                     }
                 ]

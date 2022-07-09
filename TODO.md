@@ -1,3 +1,6 @@
 - assuming only one lending market (pool) now
-- make sure metrics are correct
 - max min input check + button
+- useContext
+- update frontend SOL balance
+- show usd value of input
+- input sanity check

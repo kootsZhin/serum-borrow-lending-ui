@@ -112,26 +112,27 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
         if (!publicKey) throw new WalletNotConnectedError();
 
         let instructions = [];
+        let signers = undefined;
         switch (value) {
             case 0:
-                instructions = await actions.deposit(connection, publicKey, asset, amount);
+                ({ instructions, signers } = await actions.deposit(connection, publicKey, asset, amount));
                 break;
             case 1:
-                instructions = await actions.repay(connection, publicKey, asset, amount);
+                ({ instructions, signers } = await actions.repay(connection, publicKey, asset, amount));
                 break;
             case 2:
-                instructions = await actions.withdraw(connection, publicKey, asset, amount);
+                ({ instructions, signers } = await actions.withdraw(connection, publicKey, asset, amount));
                 break;
             case 3:
-                instructions = await actions.borrow(connection, publicKey, asset, amount);
+                ({ instructions, signers } = await actions.borrow(connection, publicKey, asset, amount));
                 break;
             default:
                 break
         }
 
-        sendAndNotifyTransactions(connection, sendTransaction, notify, instructions);
+        sendAndNotifyTransactions(connection, sendTransaction, notify, instructions, signers);
 
-    }, [amount, publicKey, sendTransaction, connection, notify]);
+    }, [amount, publicKey, sendTransaction, connection, notify, value]);
 
 
     return (
