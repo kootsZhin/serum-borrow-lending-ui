@@ -30,7 +30,7 @@ interface MarketInterface {
     pools: PoolsInterface[],
 }
 
-export const MarketContext = createContext<MarketInterface>(undefined);
+export const MarketContext = createContext<MarketInterface | undefined>(undefined);
 
 const INITIAL_VALUE = {
     overview: {
@@ -150,7 +150,7 @@ const getMarketStats: () => Promise<MarketInterface> = async () => {
 }
 
 export default function MarketProvider({ children }) {
-    const [marketStats, setMarketStats] = useState(INITIAL_VALUE);
+    const [marketStats, setMarketStats] = useState(undefined);
 
     useEffect(() => {
         fetchMarketStats();

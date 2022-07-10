@@ -36,23 +36,35 @@ const PoolOverview = () => {
                 </Grid>
 
                 <Grid item xs={3}>
-                    <Typography variant="body2">
-                        ${marketStats.overview.totalSupply.toFixed(2)}
+                    <Typography variant="body2">{
+                        marketStats ?
+                            `$${marketStats.overview.totalSupply.toFixed(2)}` :
+                            "-"
+                    }
                     </Typography>
                 </Grid>
                 <Grid item xs={3}>
-                    <Typography variant="body2">
-                        ${marketStats.overview.totalBorrows.toFixed(2)}
+                    <Typography variant="body2">{
+                        marketStats ?
+                            `$${marketStats.overview.totalBorrows.toFixed(2)}` :
+                            "-"
+                    }
                     </Typography>
                 </Grid>
                 <Grid item xs={3}>
-                    <Typography variant="body2">
-                        ${marketStats.overview.tvl.toFixed(2)}
+                    <Typography variant="body2">{
+                        marketStats ?
+                            `$${marketStats.overview.tvl.toFixed(2)}` :
+                            "-"
+                    }
                     </Typography>
                 </Grid>
                 <Grid item xs={3}>
-                    <Typography variant="body2">
-                        {marketStats.overview.assetsCount}
+                    <Typography variant="body2">{
+                        marketStats ?
+                            `${marketStats.overview.assetsCount}` :
+                            "-"
+                    }
                     </Typography>
                 </Grid>
 
