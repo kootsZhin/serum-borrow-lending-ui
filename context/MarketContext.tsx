@@ -32,45 +32,6 @@ interface MarketInterface {
 
 export const MarketContext = createContext<MarketInterface | undefined>(undefined);
 
-const INITIAL_VALUE = {
-    overview: {
-        totalSupply: 0,
-        totalBorrows: 0,
-        tvl: 0,
-        assetsCount: 0,
-    },
-    pools: [
-        {
-            symbol: "SOL",
-            name: "Solana",
-            price: 0,
-            totalDeposit: 0,
-            totalDepositValue: 0,
-            totalBorrow: 0,
-            totalBorrowValue: 0,
-            totalAvailable: 0,
-            totalAvailableValue: 0,
-            depositAPR: 0,
-            borrowAPR: 0,
-            ltv: 0,
-        },
-        {
-            symbol: "BTC",
-            name: "Bitcoin",
-            price: 0,
-            totalDeposit: 0,
-            totalDepositValue: 0,
-            totalBorrow: 0,
-            totalBorrowValue: 0,
-            totalAvailable: 0,
-            totalAvailableValue: 0,
-            depositAPR: 0,
-            borrowAPR: 0,
-            ltv: 0,
-        }
-    ]
-}
-
 const getMarketStats: () => Promise<MarketInterface> = async () => {
     const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
     const config = await (await fetch("/api/markets")).json();

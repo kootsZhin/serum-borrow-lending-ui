@@ -19,8 +19,8 @@ const MarketTableRow = ({ token }: { token: string }) => {
             <TableCell>{poolStats ? `${poolStats.totalDeposit.toFixed(2)} ($${poolStats.totalDepositValue.toFixed(2)})` : "-"}</TableCell>
             <TableCell>{poolStats ? `${poolStats.totalBorrow.toFixed(2)} ($${poolStats.totalBorrowValue.toFixed(2)})` : "-"}</TableCell>
             <TableCell>{poolStats ? `${poolStats.totalAvailable} ($${poolStats.totalAvailableValue.toFixed(2)})` : "-"}</TableCell>
-            <TableCell>{poolStats ? `${poolStats.depositAPR.toFixed(2)}%` : "-"}</TableCell>
-            <TableCell>{poolStats ? `${poolStats.borrowAPR.toFixed(2)}%` : "-"}</TableCell>
+            <TableCell>{poolStats ? `${(poolStats.depositAPR * 100).toFixed(2)}%` : "-"}</TableCell>
+            <TableCell>{poolStats ? `${(poolStats.borrowAPR * 100).toFixed(2)}%` : "-"}</TableCell>
             <TableCell>{poolStats ? `${poolStats.ltv.toFixed(2)}%` : "-"}</TableCell>
         </>
     )

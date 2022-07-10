@@ -1,20 +1,16 @@
-import { Dialog, Box, Tabs, Tab, TextField, Stack, Button, TableCell, Table, TableBody, TableRow, Grid } from '@mui/material';
+import { Dialog, Box, Tabs, Tab, TextField, Stack, Button, TableCell, Table, TableBody, TableRow } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { useConnection, useWallet } from "@solana/wallet-adapter-react"
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useContext } from 'react';
 import { WalletNotConnectedError } from '@solana/wallet-adapter-base';
-import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
-import { getAssociatedTokenAddress } from '@solana/spl-token';
 
-import { getReserves, getObligations } from '../../utils';
-import { getTokensOracleData } from "../../pyth";
-import { findWhere, find } from 'underscore';
+import { findWhere } from 'underscore';
 import { useNotify } from '../../notify';
 import * as actions from "../../actions";
-import { WRAPPED_SOL_MINT } from '../../constants';
 
 import { sendAndNotifyTransactions } from '../../actions/sendAndNotifyTransactions';
-import { Config } from '../../global';
+import { UserContext } from '../../../context/UserContext';
+import { MarketContext } from '../../../context/MarketContext';
 
 function a11yProps(index: number) {
     return {
@@ -30,87 +26,26 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
     const [onClickDisable, setOnClickDisable] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
 
-    const [userBorrowLimit, setUserBorrowLimit] = useState(0);
-    const [utilization, setUtilizatoin] = useState(0);
-
-    const [deposited, setDeposited] = useState(0);
-    const [borrowed, setBorrowed] = useState(0);
     const [amount, setAmount] = useState(0);
 
-    const [userDepositMax, setUserDepositMax] = useState(0);
-    const [userRepaytMax, setUserRepaytMax] = useState(0);
-    const [userWithdrawMax, setUserWithdrawtMax] = useState(0);
-    const [userBorrowMax, setUserBorrowMax] = useState(0);
+    const marketStats = useContext(MarketContext);
+    let poolStats;
+    try {
+        poolStats = findWhere(marketStats.pools, { symbol: token });
+    } catch (e) {
+        poolStats = undefined;
+    }
+
+    const userStats = useContext(UserContext);
+    let userPoolStats;
+    try {
+        userPoolStats = findWhere(userStats.pools, { symbol: asset });
+    } catch (e) {
+        userPoolStats = undefined;
+    }
 
     const { connection } = useConnection();
     const { publicKey, sendTransaction } = useWallet();
-
-    useEffect(() => {
-        if (publicKey) {
-            getUserMetrics(publicKey);
-        }
-    }, [publicKey])
-
-    const getUserMetrics = async (publicKey: PublicKey) => {
-        const config: Config = await (await fetch("/api/markets")).json();
-        const tokensOracle = await getTokensOracleData(connection, config, config.markets[0].reserves);
-        const allReserves = await getReserves(connection, config, config.markets[0].address);
-        const allObligation = await getObligations(connection, config, config.markets[0].address);
-        const reserve = findWhere(config.markets[0].reserves, { asset: asset });
-        const reserveConfig = find(allReserves, (r) => r!.pubkey.toString() === reserve.address)!;
-
-        const loanToValue = reserveConfig.data.config.loanToValueRatio / 100;
-
-        const userObligation = find(allObligation, (r) => r!.data.owner.toBase58() === publicKey.toBase58());
-
-        let userDepositedValue = 0;
-        let userBorrowedValue = 0;
-        if (userObligation) {
-            for (const reserve of allReserves) {
-
-                const userDepositedToken = find(userObligation.data.deposits, (r) => r!.depositReserve.toBase58() === reserve.pubkey.toBase58());
-                const userDepositedTokenBalance = userDepositedToken ? Number(userDepositedToken.depositedAmount.toString()) / 10 ** reserve.data.liquidity.mintDecimals : 0;
-                const tokenOracle = findWhere(tokensOracle, { reserveAddress: reserve.pubkey.toBase58() });
-                const userDepositedTokenBalanceValue = userDepositedTokenBalance * tokenOracle.price;
-
-                const userBorrowedToken = find(userObligation.data.borrows, (r) => r!.borrowReserve.toBase58() === reserve.pubkey.toBase58());
-                const userBorrowedTokenBalance = userBorrowedToken ? Number(userBorrowedToken.borrowedAmountWads.toString()) / 10 ** reserve.data.liquidity.mintDecimals : 0;
-                const userBorrowedTokenBalanceValue = userBorrowedTokenBalance * tokenOracle.price;
-
-                userDepositedValue += userDepositedTokenBalanceValue;
-                userBorrowedValue += userBorrowedTokenBalanceValue;
-
-
-                if (reserve.pubkey.toBase58() === reserveConfig.pubkey.toBase58()) {
-                    let tokenAssetsBalance;
-                    if (reserve.data.liquidity.supplyPubkey === WRAPPED_SOL_MINT) {
-                        const tokenAddress = await getAssociatedTokenAddress(new PublicKey(reserve.data.liquidity.supplyPubkey), publicKey);
-                        try {
-                            tokenAssetsBalance = await (await connection.getTokenAccountBalance(tokenAddress)).value.uiAmount;
-                        } catch (error: unknown) {
-                            tokenAssetsBalance = 0;
-                        }
-                    } else {
-                        tokenAssetsBalance = Number((await connection.getBalance(publicKey)).toString()) / LAMPORTS_PER_SOL;
-                    }
-
-                    setUserDepositMax(tokenAssetsBalance);
-                    setUserRepaytMax(userBorrowedValue > tokenAssetsBalance ? tokenAssetsBalance : userBorrowedValue);
-                    setUserWithdrawtMax(0);
-                    setUserBorrowMax(0); //TODO
-                }
-            }
-        }
-
-        const borrowLimit = userDepositedValue * loanToValue;
-        const utilization = userBorrowedValue / borrowLimit;
-
-        setDeposited(userDepositedValue);
-        setBorrowed(userBorrowedValue);
-
-        setUserBorrowLimit(borrowLimit);
-        setUtilizatoin(utilization);
-    }
 
     const handleClose = () => {
         setOnClickDisable(false);
@@ -148,16 +83,16 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
         let max;
         switch (value) {
             case 0:
-                max = userDepositMax
+                max = userPoolStats.balance;
                 break;
             case 1:
-                max = userRepaytMax
+                max = userPoolStats.balance > userPoolStats.borrowed ? userPoolStats.borrowed : userPoolStats.balance;
                 break;
             case 2:
-                max = userWithdrawMax
+                max = userPoolStats.deposited;
                 break;
             case 3:
-                max = userBorrowMax
+                max = 0;
                 break;
             default:
                 break
@@ -237,11 +172,11 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
                             <TableBody>
                                 <TableRow>
                                     <TableCell>User borrow limit</TableCell>
-                                    <TableCell>${userBorrowLimit.toFixed(2)}</TableCell>
+                                    <TableCell>${0}</TableCell>
                                 </TableRow>
                                 <TableRow>
                                     <TableCell>Utilization</TableCell>
-                                    <TableCell>{(utilization * 100).toFixed(2)}%</TableCell>
+                                    <TableCell>{0}%</TableCell>
                                 </TableRow>
                             </TableBody>
                         </Table>
