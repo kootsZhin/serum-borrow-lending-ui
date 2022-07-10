@@ -31,7 +31,7 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
     const marketStats = useContext(MarketContext);
     let poolStats;
     try {
-        poolStats = findWhere(marketStats.pools, { symbol: token });
+        poolStats = findWhere(marketStats.pools, { symbol: asset });
     } catch (e) {
         poolStats = undefined;
     }
