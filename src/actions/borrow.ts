@@ -19,7 +19,6 @@ import { wrapSol } from './wrapSol';
 
 export const borrow = async (connection: Connection, publicKey: PublicKey, asset: string, withdrawAmount: number) => {
     const config: Config = await (await fetch("/api/markets")).json();
-    console.log("borrow")
     let instructions;
     let signers;
     if (asset === "SOL" || asset === "WSOL") {
@@ -47,7 +46,6 @@ export const borrow = async (connection: Connection, publicKey: PublicKey, asset
     try {
         await getAccount(connection, userLiquidityAccount);
     } catch (error: unknown) {
-        console.log(error);
         if (!(asset === "SOL" || asset === "WSOL") && (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError)) {
             instructions.push(createAssociatedTokenAccountInstruction(
                 publicKey,

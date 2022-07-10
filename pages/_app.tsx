@@ -17,6 +17,7 @@ import {
 import { clusterApiUrl } from '@solana/web3.js';
 import { createDefaultAuthorizationResultCache, SolanaMobileWalletAdapter } from '@solana-mobile/wallet-adapter-mobile';
 import { SnackbarProvider } from 'notistack';
+import MarketProvider from '../context/MarketContext';
 
 // Default styles that can be overridden by your app
 require('@solana/wallet-adapter-react-ui/styles.css');
@@ -55,16 +56,18 @@ function MyApp({ Component, pageProps }: AppProps) {
     );
 
     return (
-        <ConnectionProvider endpoint={endpoint}>
-            <WalletProvider wallets={wallets} autoConnect>
-                <WalletModalProvider>
-                    <SnackbarProvider>
-                        <Header />
-                        <Component {...pageProps} />
-                    </SnackbarProvider>
-                </WalletModalProvider>
-            </WalletProvider>
-        </ConnectionProvider >
+        <MarketProvider>
+            <ConnectionProvider endpoint={endpoint}>
+                <WalletProvider wallets={wallets} autoConnect>
+                    <WalletModalProvider>
+                        <SnackbarProvider>
+                            <Header />
+                            <Component {...pageProps} />
+                        </SnackbarProvider>
+                    </WalletModalProvider>
+                </WalletProvider>
+            </ConnectionProvider >
+        </MarketProvider>
     )
 }
 
