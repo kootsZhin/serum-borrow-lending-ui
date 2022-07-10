@@ -6,7 +6,6 @@ export const wrapSol = async (connection, publicKey, amount) => {
     const wrappedSolAccount = Keypair.generate();
     const instructions = [];
     const signers = [wrappedSolAccount];
-    console.log("wrapping sol");
     instructions.push(
         SystemProgram.createAccount({
             fromPubkey: publicKey,
