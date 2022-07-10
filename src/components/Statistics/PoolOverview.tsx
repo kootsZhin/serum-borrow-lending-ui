@@ -37,17 +37,17 @@ const PoolOverview = () => {
 
                 <Grid item xs={3}>
                     <Typography variant="body2">
-                        ${marketStats.overview.totalSupply}
+                        ${marketStats.overview.totalSupply.toFixed(2)}
                     </Typography>
                 </Grid>
                 <Grid item xs={3}>
                     <Typography variant="body2">
-                        ${marketStats.overview.totalBorrows}
+                        ${marketStats.overview.totalBorrows.toFixed(2)}
                     </Typography>
                 </Grid>
                 <Grid item xs={3}>
                     <Typography variant="body2">
-                        ${marketStats.overview.tvl}
+                        ${marketStats.overview.tvl.toFixed(2)}
                     </Typography>
                 </Grid>
                 <Grid item xs={3}>

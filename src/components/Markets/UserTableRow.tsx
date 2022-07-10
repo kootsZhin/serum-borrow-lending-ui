@@ -1,12 +1,14 @@
 import { useConnection, useWallet } from "@solana/wallet-adapter-react"
 import { getAssociatedTokenAddress } from '@solana/spl-token';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { findWhere, find } from "underscore";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { TableCell } from "@mui/material"
 
+
 import { getReserves, getObligations } from '../../utils';
 import { getTokensOracleData } from "../../pyth";
+import { UserContext } from "../../../context/UserContext";
 
 const UserTableRow = ({ token }: { token: string }) => {
 
@@ -16,6 +18,9 @@ const UserTableRow = ({ token }: { token: string }) => {
     const [userBorrowedValue, setUserBorrowedValue] = useState("");
     const [userBalance, setUserBalance] = useState("");
     const [userBalanceValue, setUserBalanceValue] = useState("");
+
+    const userStats = useContext(UserContext);
+    const userPoolStats = findWhere(userStats.pools, { symbol: token });
 
     const { connection } = useConnection();
     const { publicKey } = useWallet();
@@ -79,9 +84,9 @@ const UserTableRow = ({ token }: { token: string }) => {
 
     return (
         <>
-            <TableCell>{userDeposited ? `${userDeposited} ($${(userDepositedValue)})` : "-"}</TableCell>
-            <TableCell>{userBorrowed ? `${userBorrowed} ($${userBorrowedValue})` : "-"}</TableCell>
-            <TableCell>{userBalance ? `${userBalance} ($${userBalanceValue})` : "-"}</TableCell>
+            <TableCell>{userPoolStats.deposited.toFixed(2) ? `${userPoolStats.deposited.toFixed(2)} ($${(userPoolStats.depositedValue.toFixed(2))})` : "-"}</TableCell>
+            <TableCell>{userPoolStats.borrowed.toFixed(2) ? `${userPoolStats.borrowed.toFixed(2)} ($${userPoolStats.borrowedValue.toFixed(2)})` : "-"}</TableCell>
+            <TableCell>{userPoolStats.balance.toFixed(2) ? `${userPoolStats.balance.toFixed(2)} ($${userPoolStats.balanceValue.toFixed(2)})` : "-"}</TableCell>
         </>
     )
 }

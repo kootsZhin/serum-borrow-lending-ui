@@ -29,8 +29,8 @@ const columns: readonly Column[] = [
     { id: "borrowAPR", label: "Borrow APR" },
     { id: "loanToValue", label: "LTV", format: (value) => `${value}%` },
 
-    { id: "userDeposit", label: "My Deposit" },
-    { id: "userBorrow", label: "My Borrow" },
+    { id: "userDeposit", label: "My Deposited" },
+    { id: "userBorrow", label: "My Borrowed" },
     { id: "userBalance", label: "My Balance" },
 ];
 

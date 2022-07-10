@@ -11,12 +11,12 @@ const MarketTableRow = ({ token }: { token: string }) => {
     return (
         <>
             <TableCell>{token}</TableCell>
-            <TableCell>{poolStats.totalDeposit ? `${poolStats.totalDeposit} ($${poolStats.totalDepositValue})` : "-"}</TableCell>
-            <TableCell>{poolStats.totalBorrow ? `${poolStats.totalBorrow} ($${poolStats.totalBorrowValue})` : "-"}</TableCell>
-            <TableCell>{poolStats.totalAvailable ? `${poolStats.totalAvailable} ($${poolStats.totalAvailableValue})` : "-"}</TableCell>
-            <TableCell>{poolStats.depositAPR ? `${poolStats.depositAPR}%` : "-"}</TableCell>
-            <TableCell>{poolStats.borrowAPR ? `${poolStats.borrowAPR}%` : "-"}</TableCell>
-            <TableCell>{poolStats.ltv ? `${poolStats.ltv}%` : "-"}</TableCell>
+            <TableCell>{poolStats.totalDeposit ? `${poolStats.totalDeposit.toFixed(2)} ($${poolStats.totalDepositValue.toFixed(2)})` : "-"}</TableCell>
+            <TableCell>{poolStats.totalBorrow ? `${poolStats.totalBorrow.toFixed(2)} ($${poolStats.totalBorrowValue.toFixed(2)})` : "-"}</TableCell>
+            <TableCell>{poolStats.totalAvailable ? `${poolStats.totalAvailable} ($${poolStats.totalAvailableValue.toFixed(2)})` : "-"}</TableCell>
+            <TableCell>{poolStats.depositAPR ? `${poolStats.depositAPR.toFixed(2)}%` : "-"}</TableCell>
+            <TableCell>{poolStats.borrowAPR ? `${poolStats.borrowAPR.toFixed(2)}%` : "-"}</TableCell>
+            <TableCell>{poolStats.ltv ? `${poolStats.ltv.toFixed(2)}%` : "-"}</TableCell>
         </>
     )
 }
