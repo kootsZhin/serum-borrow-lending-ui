@@ -5,7 +5,6 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
-import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import { useState, useEffect } from 'react'
 import MarketTableRow from './MarketTableRow';
@@ -73,7 +72,7 @@ export default function Markets() {
                         <TableRow>
                             {columns.map((column) => (
                                 <TableCell
-                                    key={column.id}
+                                    key={`${column.id}-cell`}
                                     align={column.align}
                                     style={{ minWidth: column.minWidth }}
                                 >
@@ -86,9 +85,9 @@ export default function Markets() {
                         {
                             markets.map((token) => (
                                 <>
-                                    <TableRow hover onClick={() => { handleClickOpen(token) }} key={token}>
-                                        <MarketTableRow token={token} key={token} />
-                                        <UserTableRow token={token} key={token} />
+                                    <TableRow hover onClick={() => { handleClickOpen(token) }} key={`${token}-row`}>
+                                        <MarketTableRow token={token} key={`${token}-market-row`} />
+                                        <UserTableRow token={token} key={`${token}-user-row`} />
                                     </TableRow>
                                     <ActionsPanel
                                         key={token}

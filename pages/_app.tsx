@@ -57,20 +57,20 @@ function MyApp({ Component, pageProps }: AppProps) {
     );
 
     return (
-        <UserProvider>
-            <MarketProvider>
-                <ConnectionProvider endpoint={endpoint}>
-                    <WalletProvider wallets={wallets} autoConnect>
-                        <WalletModalProvider>
+        <ConnectionProvider endpoint={endpoint}>
+            <WalletProvider wallets={wallets} autoConnect>
+                <WalletModalProvider>
+                    <UserProvider>
+                        <MarketProvider>
                             <SnackbarProvider>
                                 <Header />
                                 <Component {...pageProps} />
                             </SnackbarProvider>
-                        </WalletModalProvider>
-                    </WalletProvider>
-                </ConnectionProvider >
-            </MarketProvider>
-        </UserProvider>
+                        </MarketProvider>
+                    </UserProvider>
+                </WalletModalProvider>
+            </WalletProvider>
+        </ConnectionProvider >
     )
 }
 
