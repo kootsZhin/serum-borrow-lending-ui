@@ -72,9 +72,9 @@ export default function Markets() {
                         <TableRow>
                             {columns.map((column) => (
                                 <TableCell
-                                    key={`${column.id}-cell`}
                                     align={column.align}
                                     style={{ minWidth: column.minWidth }}
+                                    key={`${column.id}-cell`}
                                 >
                                     {column.label}
                                 </TableCell>
@@ -84,18 +84,20 @@ export default function Markets() {
                     <TableBody>
                         {
                             markets.map((token) => (
-                                <>
-                                    <TableRow hover onClick={() => { handleClickOpen(token) }} key={`${token}-row`}>
-                                        <MarketTableRow token={token} key={`${token}-market-row`} />
-                                        <UserTableRow token={token} key={`${token}-user-row`} />
-                                    </TableRow>
-                                    <ActionsPanel
-                                        key={token}
-                                        open={open === token}
-                                        asset={token}
-                                        onClose={handleClose}
-                                    />
-                                </>
+                                <TableRow hover onClick={() => { handleClickOpen(token) }} key={`${token}-row`}>
+                                    <MarketTableRow token={token} />
+                                    <UserTableRow token={token} />
+                                </TableRow>
+                            ))
+                        }
+                        {
+                            markets.map((token) => (
+                                <ActionsPanel
+                                    open={open === token}
+                                    asset={token}
+                                    onClose={handleClose}
+                                    key={`${token}-actions-panel`}
+                                />
                             ))
                         }
                     </TableBody>

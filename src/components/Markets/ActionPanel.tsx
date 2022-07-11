@@ -26,7 +26,7 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
     const [onClickDisable, setOnClickDisable] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
 
-    const [amount, setAmount] = useState(0);
+    const [amount, setAmount] = useState("");
 
     const marketStats = useContext(MarketContext);
     let poolStats;
@@ -70,11 +70,11 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
     }
 
     const handleInputChange = (event) => {
-        _handleInputChange(Number(event.target.value));
+        _handleInputChange(event.target.value.toString());
     }
 
     const _handleInputChange = (inputValue) => {
-        setAmount(inputValue)
+        setAmount(inputValue.toString());
         inputValue ? setDisplayAmount(inputValue.toString()) : setDisplayAmount("")
         inputValue ? setOnClickDisable(false) : setOnClickDisable(true)
     }
@@ -161,13 +161,14 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
                             label={`Enter ${asset} Amount`}
                             variant="outlined"
                             onChange={handleInputChange}
-                            value={amount ? amount : null}
                             required
+                            value={displayAmount}
+                            helperText={`${displayAmount} ${asset} = $${poolStats ? (Number(displayAmount) * poolStats.price).toFixed(2) : "-"}`}
                             InputLabelProps={{
                                 shrink: true,
                             }}
                         />
-                        <Button variant="outlined" onClick={useMax}>Use max</Button>
+                        {/* <Button variant="outlined" onClick={useMax}>Use max</Button> */}
                         <Table>
                             <TableBody>
                                 <TableRow>

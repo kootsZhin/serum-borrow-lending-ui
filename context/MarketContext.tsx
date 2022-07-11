@@ -81,7 +81,7 @@ const getMarketStats: () => Promise<MarketInterface> = async () => {
         pools.push({
             symbol: asset.symbol,
             name: asset.name,
-            price: tokenOracle.price,
+            price: Number(tokenOracle.price.toString()),
             totalDeposit: totalDeposit,
             totalDepositValue: totalDeposit * tokenOracle.price,
             totalBorrow: totalBorrow,

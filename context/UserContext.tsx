@@ -60,7 +60,6 @@ const getUserStats = async (publicKey) => {
 
             let tokenAssetsBalance = 0;
             if (!(reserve.data.liquidity.mintPubkey.toString() === WRAPPED_SOL_MINT.toString())) {
-                console.log(reserve)
                 const tokenAddress = await getAssociatedTokenAddress(reserve.data.liquidity.mintPubkey, publicKey);
                 try {
                     tokenAssetsBalance = await (await connection.getTokenAccountBalance(tokenAddress)).value.uiAmount;
@@ -77,7 +76,7 @@ const getUserStats = async (publicKey) => {
             pools.push({
                 symbol: assetConfig.symbol,
                 name: assetConfig.name,
-                price: tokenOracle.price,
+                price: Number(tokenOracle.price.toString()),
                 deposited: userDepositedTokenBalance,
                 depositedValue: userDepositedTokenBalanceValue,
                 borrowed: userBorrowedTokenBalance,
@@ -113,7 +112,6 @@ export default function UserProvider({ children }) {
         if (publicKey) {
             const userStats = await getUserStats(publicKey);
             setUserStats(userStats);
-            console.log(userStats)
         }
     }
 
