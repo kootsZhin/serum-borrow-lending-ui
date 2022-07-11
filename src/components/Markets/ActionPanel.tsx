@@ -131,16 +131,16 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
         let signers = undefined;
         switch (value) {
             case 0:
-                ({ instructions, signers } = await actions.deposit(connection, publicKey, asset, amount));
+                ({ instructions, signers } = await actions.deposit(connection, publicKey, asset, Number(amount)));
                 break;
             case 1:
-                ({ instructions, signers } = await actions.repay(connection, publicKey, asset, amount));
+                ({ instructions, signers } = await actions.repay(connection, publicKey, asset, Number(amount)));
                 break;
             case 2:
-                ({ instructions, signers } = await actions.withdraw(connection, publicKey, asset, amount));
+                ({ instructions, signers } = await actions.withdraw(connection, publicKey, asset, Number(amount)));
                 break;
             case 3:
-                ({ instructions, signers } = await actions.borrow(connection, publicKey, asset, amount));
+                ({ instructions, signers } = await actions.borrow(connection, publicKey, asset, Number(amount)));
                 break;
             default:
                 break
