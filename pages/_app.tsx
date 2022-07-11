@@ -17,8 +17,6 @@ import {
 import { clusterApiUrl } from '@solana/web3.js';
 import { createDefaultAuthorizationResultCache, SolanaMobileWalletAdapter } from '@solana-mobile/wallet-adapter-mobile';
 import { SnackbarProvider } from 'notistack';
-import MarketProvider from '../context/MarketContext';
-import UserProvider from '../context/UserContext';
 import DataProvider from '../context';
 
 // Default styles that can be overridden by your app

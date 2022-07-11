@@ -1,6 +1,3 @@
 - assuming only one lending market (pool) now
 - max min input check + button
-- useContext
-- update frontend SOL balance
-- show usd value of input
-- input sanity check
+- 

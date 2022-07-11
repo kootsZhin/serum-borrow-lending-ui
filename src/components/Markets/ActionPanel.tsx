@@ -103,10 +103,10 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
                 max = userPoolStats.balance > userPoolStats.borrowed ? userPoolStats.borrowed : userPoolStats.balance;
                 break;
             case 2:
-                max = userPoolStats.deposited;
+                max = Math.min(userPoolStats.deposited, userStats.platform.remainingBorrowingPower / poolStats.ltv / userPoolStats.price);
                 break;
             case 3:
-                max = 0;
+                max = userStats.platform.remainingBorrowingPower / poolStats.price;
                 break;
             default:
                 break
@@ -188,7 +188,7 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
                             <TableBody>
                                 <TableRow>
                                     <TableCell>Remaining borrowing power</TableCell>
-                                    <TableCell>${userStats ? ((userStats.platform.borrowingPower - userStats.platform.borrowed).toFixed(2)) : "-"}</TableCell>
+                                    <TableCell>${userStats ? ((userStats.platform.remainingBorrowingPower).toFixed(2)) : "-"}</TableCell>
                                 </TableRow>
                                 <TableRow>
                                     <TableCell>Utilization</TableCell>

@@ -110,25 +110,3 @@ export const getMarketStats: () => Promise<MarketInterface> = async () => {
         pools: pools,
     }
 }
-
-export default function MarketProvider({ children }) {
-    const [marketStats, setMarketStats] = useState(undefined);
-
-    useEffect(() => {
-        fetchMarketStats();
-        const interval = setInterval(fetchMarketStats, CONTEXT_UPDATE_INTERVAL);
-
-        return () => clearInterval(interval);
-    }, []);
-
-    const fetchMarketStats = async () => {
-        const marketStats = await getMarketStats();
-        setMarketStats(marketStats);
-    }
-
-    return (
-        <MarketContext.Provider value={marketStats}>
-            {children}
-        </MarketContext.Provider>
-    )
-}

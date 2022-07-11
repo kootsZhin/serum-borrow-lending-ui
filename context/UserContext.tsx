@@ -29,6 +29,8 @@ export interface UserInterface {
         deposited: number,
         borrowed: number,
         borrowingPower: number,
+        remainingBorrowingPower: number,
+        positionCount: number,
     },
     pools: UserPoolInterface[]
 }
@@ -99,34 +101,10 @@ export const getUserStats = async (publicKey) => {
             deposited: userDepositedValue,
             borrowed: userBorrowedValue,
             borrowingPower: userBorrowingPower,
+            remainingBorrowingPower: userBorrowingPower - userBorrowedValue,
             positionsCount: userObligation.data.deposits.length + userObligation.data.borrows.length,
+
         },
         pools: pools
     }
-}
-
-export default function UserProvider({ children }) {
-    const [userStats, setUserStats] = useState(undefined);
-
-    const { publicKey } = useWallet();
-
-    useEffect(() => {
-        fetchUserStats();
-        const interval = setInterval(fetchUserStats, CONTEXT_UPDATE_INTERVAL);
-
-        return () => clearInterval(interval);
-    }, [publicKey]);
-
-    const fetchUserStats = async () => {
-        if (publicKey) {
-            const userStats = await getUserStats(publicKey);
-            setUserStats(userStats);
-        }
-    }
-
-    return (
-        <UserContext.Provider value={userStats}>
-            {children}
-        </UserContext.Provider>
-    )
 }
