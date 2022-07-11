@@ -16,19 +16,25 @@ const UserPlatformAssets = () => {
                     </Typography>
                 </Grid>
 
-                <Grid item xs={6}>
+                <Grid item xs={4}>
                     <Typography variant="body2">
                         Deposited:
                     </Typography>
                 </Grid>
 
-                <Grid item xs={6}>
+                <Grid item xs={4}>
                     <Typography variant="body2">
                         Borrowed:
                     </Typography>
                 </Grid>
 
-                <Grid item xs={6}>
+                <Grid item xs={4}>
+                    <Typography variant="body2">
+                        Borrowing Power:
+                    </Typography>
+                </Grid>
+
+                <Grid item xs={4}>
                     <Typography variant="body2">
                         {
                             userStats ?
@@ -38,11 +44,21 @@ const UserPlatformAssets = () => {
                     </Typography>
                 </Grid>
 
-                <Grid item xs={6}>
+                <Grid item xs={4}>
                     <Typography variant="body2">
                         {
                             userStats ?
                                 `$${userStats.platform.borrowed.toFixed(2)}` :
+                                "-"
+                        }
+                    </Typography>
+                </Grid>
+
+                <Grid item xs={4}>
+                    <Typography variant="body2">
+                        {
+                            userStats ?
+                                `$${userStats.platform.borrowingPower.toFixed(2)}` :
                                 "-"
                         }
                     </Typography>

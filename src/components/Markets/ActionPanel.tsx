@@ -168,16 +168,20 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
                                 shrink: true,
                             }}
                         />
-                        {/* <Button variant="outlined" onClick={useMax}>Use max</Button> */}
+                        <Button variant="outlined" onClick={useMax}>Use max</Button>
                         <Table>
                             <TableBody>
                                 <TableRow>
-                                    <TableCell>User borrow limit</TableCell>
-                                    <TableCell>${0}</TableCell>
+                                    <TableCell>Maximum borrowing power</TableCell>
+                                    <TableCell>${(userStats.platform.borrowingPower).toFixed(2)}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>Remaining borrowing power</TableCell>
+                                    <TableCell>${(userStats.platform.borrowingPower - userStats.platform.borrowed).toFixed(2)}</TableCell>
                                 </TableRow>
                                 <TableRow>
                                     <TableCell>Utilization</TableCell>
-                                    <TableCell>{0}%</TableCell>
+                                    <TableCell>{(userStats.platform.borrowed / userStats.platform.borrowingPower * 100).toFixed(2)}%</TableCell>
                                 </TableRow>
                             </TableBody>
                         </Table>

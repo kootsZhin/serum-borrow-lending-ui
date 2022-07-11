@@ -77,7 +77,7 @@ const getMarketStats: () => Promise<MarketInterface> = async () => {
 
         const depositAPR = borrowAPR * currentUtilization;
 
-        const loanToValue = reserveConfig.config.loanToValueRatio;
+        const loanToValue = reserveConfig.config.loanToValueRatio / 100;
 
         pools.push({
             symbol: asset.symbol,

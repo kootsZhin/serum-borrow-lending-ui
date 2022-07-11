@@ -16,6 +16,7 @@ interface UserInterface {
     platform: {
         deposited: number,
         borrowed: number,
+        borrowingPower: number,
     },
     pools: UserPoolInterface[]
 }
@@ -46,6 +47,7 @@ const getUserStats = async (publicKey) => {
 
     let userDepositedValue = 0;
     let userBorrowedValue = 0;
+    let userBorrowingPower = 0;
 
     if (userObligation) {
         for (const reserve of allReserves) {
@@ -58,6 +60,8 @@ const getUserStats = async (publicKey) => {
             const userBorrowedToken = find(userObligation.data.borrows, (r) => r!.borrowReserve.toBase58() === reserve.pubkey.toBase58());
             const userBorrowedTokenBalance = userBorrowedToken ? Number(userBorrowedToken.borrowedAmountWads.toString()) / 10 ** reserve.data.liquidity.mintDecimals : 0;
             const userBorrowedTokenBalanceValue = userBorrowedTokenBalance * tokenOracle.price;
+
+            const loanToValue = reserve.data.config.loanToValueRatio / 100;
 
             let tokenAssetsBalance = 0;
             if (!(reserve.data.liquidity.mintPubkey.toString() === WRAPPED_SOL_MINT.toString())) {
@@ -73,6 +77,8 @@ const getUserStats = async (publicKey) => {
 
             userDepositedValue += userDepositedTokenBalanceValue;
             userBorrowedValue += userBorrowedTokenBalanceValue;
+
+            userBorrowingPower += userDepositedTokenBalanceValue * loanToValue;
 
             pools.push({
                 symbol: assetConfig.symbol,
@@ -92,6 +98,7 @@ const getUserStats = async (publicKey) => {
         platform: {
             deposited: userDepositedValue,
             borrowed: userBorrowedValue,
+            borrowingPower: userBorrowingPower,
         },
         pools: pools
     }
