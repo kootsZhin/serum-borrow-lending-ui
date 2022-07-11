@@ -6,4 +6,4 @@ export const WRAPPED_SOL_MINT = new PublicKey(
     "So11111111111111111111111111111111111111112"
 );
 
-export const CONTEXT_UPDATE_INTERVAL = 1000; // 1 second
+export const CONTEXT_UPDATE_INTERVAL = 10000; // 10 second
