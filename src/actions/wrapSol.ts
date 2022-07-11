@@ -16,13 +16,15 @@ export const wrapSol = async (connection, publicKey, amount) => {
         })
     );
 
-    instructions.push(
-        SystemProgram.transfer({
-            fromPubkey: publicKey,
-            toPubkey: wrappedSolAccount.publicKey,
-            lamports: Math.floor(amount * LAMPORTS_PER_SOL),
-        })
-    );
+    if (amount) {
+        instructions.push(
+            SystemProgram.transfer({
+                fromPubkey: publicKey,
+                toPubkey: wrappedSolAccount.publicKey,
+                lamports: Math.floor(amount * LAMPORTS_PER_SOL),
+            })
+        );
+    }
 
     instructions.push(
         createInitializeAccountInstruction(

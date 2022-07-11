@@ -16,7 +16,7 @@ export const withdraw = async (connection: Connection, publicKey: PublicKey, ass
     let instructions;
     let signers;
     if (asset === "SOL" || asset === "WSOL") {
-        ({ instructions, signers } = await wrapSol(connection, publicKey, withdrawAmount));
+        ({ instructions, signers } = await wrapSol(connection, publicKey, 0));
     } else {
         instructions = [];
         signers = undefined;

@@ -22,7 +22,7 @@ export const borrow = async (connection: Connection, publicKey: PublicKey, asset
     let instructions;
     let signers;
     if (asset === "SOL" || asset === "WSOL") {
-        ({ instructions, signers } = await wrapSol(connection, publicKey, withdrawAmount));
+        ({ instructions, signers } = await wrapSol(connection, publicKey, 0));
     } else {
         instructions = [];
         signers = undefined;
