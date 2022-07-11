@@ -1,4 +1,4 @@
-import { Dialog, Box, Tabs, Tab, TextField, Stack, Button, TableCell, Table, TableBody, TableRow } from '@mui/material';
+import { Dialog, Box, Tabs, Tab, TextField, Stack, Button, TableCell, Table, TableBody, TableRow, Grid } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { useConnection, useWallet } from "@solana/wallet-adapter-react"
 import { useCallback, useState, useContext } from 'react';
@@ -119,6 +119,32 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
         _handleInputChange(max);
     }
 
+    const useHalfMax = () => {
+        let max;
+        switch (value) {
+            case 0:
+                max = userPoolStats.balance;
+                break;
+            case 1:
+                max = userPoolStats.balance > userPoolStats.borrowed ? userPoolStats.borrowed : userPoolStats.balance;
+                break;
+            case 2:
+                max = Math.min(userPoolStats.deposited, userStats.platform.remainingBorrowingPower / poolStats.ltv / userPoolStats.price);
+                break;
+            case 3:
+                max = Math.min(userStats.platform.remainingBorrowingPower / poolStats.price, poolStats.totalAvailable);
+                break;
+            default:
+                break
+        }
+
+        if (!max) {
+            notify("info", `Your max ${idToActions[value]} value equals to ${max}`);
+        }
+
+        _handleInputChange(max * 0.5);
+    }
+
     const notify = useNotify();
 
     const onClick = useCallback(async () => {
@@ -183,7 +209,14 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
                                 shrink: true,
                             }}
                         />
-                        <Button variant="outlined" onClick={useMax}>Use max</Button>
+                        <Grid container spacing={0}>
+                            <Grid item xs={6}>
+                                <Button disabled={!publicKey} sx={{ width: '100%', overflow: 'hidden' }} variant="outlined" onClick={useMax}>max</Button>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <Button disabled={!publicKey} sx={{ width: '100%', overflow: 'hidden' }} variant="outlined" onClick={useHalfMax}>50% max</Button>
+                            </Grid>
+                        </Grid>
                         <Table>
                             <TableBody>
                                 <TableRow>
