@@ -6,12 +6,13 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import MarketTableRow from './MarketTableRow';
 import UserTableRow from './UserTableRow';
 import ActionsPanel from './ActionPanel';
 import { TableFooter, Typography } from '@mui/material';
 import { CONTEXT_UPDATE_INTERVAL } from '../../constants';
+import { DataContext } from '../../../context';
 
 interface Column {
     id: string;
@@ -39,6 +40,9 @@ export default function Markets() {
     const [markets, setMarkets] = useState([]);
     const [open, setOpen] = useState("");
 
+    const [nextUpdate, setNextUpdate] = useState(CONTEXT_UPDATE_INTERVAL / 1000);
+    const data = useContext(DataContext);
+
     const handleClickOpen = (token) => {
         setOpen(token);
     };
@@ -52,6 +56,21 @@ export default function Markets() {
             getMarkets();
         }
     }, []);
+
+
+    useEffect(() => {
+        setNextUpdate(CONTEXT_UPDATE_INTERVAL / 1000);
+    }, [data]);
+
+    useEffect(() => {
+        if (!nextUpdate) return;
+        const interval = setInterval(nextUpdateMinusOne, 1000);
+        return () => clearInterval(interval);
+    }, [nextUpdate]);
+
+    const nextUpdateMinusOne = () => {
+        setNextUpdate(nextUpdate - 1);
+    }
 
     async function getMarkets() {
 
@@ -70,7 +89,7 @@ export default function Markets() {
         <Paper sx={{ width: '100%', overflow: 'hidden' }}>
             <TableContainer sx={{ maxHeight: "70vh" }}>
                 <Table stickyHeader aria-label="sticky table">
-                    <caption>Data fetching interval: {CONTEXT_UPDATE_INTERVAL / 1000} second(s)</caption>
+                    <caption>Nest update in: {nextUpdate} second(s)</caption>
                     <TableHead>
                         <TableRow>
                             {columns.map((column) => (
