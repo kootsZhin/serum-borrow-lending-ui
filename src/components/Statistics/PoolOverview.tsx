@@ -1,12 +1,20 @@
 import { Card, Grid, Typography } from '@mui/material'
 import { useContext } from 'react';
+import { DataContext } from '../../../context';
 import { MarketContext } from "../../../context/MarketContext";
 
 const PoolOverview = () => {
-    const marketStats = useContext(MarketContext);
+    const data = useContext(DataContext);
+
+    let marketStats;
+    try {
+        marketStats = data.market;
+    } catch (e) {
+        marketStats = undefined;
+    }
 
     return (
-        <Card>
+        <Card sx={{ width: '100%', overflow: 'hidden' }}>
             <Grid container spacing={1} padding={2}>
                 <Grid item xs={12}>
                     <Typography variant='h6'>
@@ -31,7 +39,7 @@ const PoolOverview = () => {
                 </Grid>
                 <Grid item xs={3}>
                     <Typography variant="body2">
-                        Assets
+                        Asset(s)
                     </Typography>
                 </Grid>
 

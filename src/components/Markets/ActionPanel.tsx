@@ -11,6 +11,7 @@ import * as actions from "../../actions";
 import { sendAndNotifyTransactions } from '../../actions/sendAndNotifyTransactions';
 import { UserContext } from '../../../context/UserContext';
 import { MarketContext } from '../../../context/MarketContext';
+import { DataContext } from '../../../context';
 
 function a11yProps(index: number) {
     return {
@@ -28,7 +29,15 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
 
     const [amount, setAmount] = useState("");
 
-    const marketStats = useContext(MarketContext);
+    const data = useContext(DataContext);
+
+
+    let marketStats;
+    try {
+        marketStats = data.market;
+    } catch (e) {
+        marketStats = undefined;
+    }
     let poolStats;
     try {
         poolStats = findWhere(marketStats.pools, { symbol: asset });
@@ -36,7 +45,12 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
         poolStats = undefined;
     }
 
-    const userStats = useContext(UserContext);
+    let userStats;
+    try {
+        userStats = data.user;
+    } catch (e) {
+        userStats = undefined;
+    }
     let userPoolStats;
     try {
         userPoolStats = findWhere(userStats.pools, { symbol: asset });
@@ -48,7 +62,7 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
     const { publicKey, sendTransaction } = useWallet();
 
     const handleClose = () => {
-        setOnClickDisable(false);
+        setOnClickDisable(true);
         onClose();
         setValue(0);
     };
@@ -159,6 +173,7 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
                     <Stack spacing={2}>
                         <TextField
                             label={`Enter ${asset} Amount`}
+                            type="number"
                             variant="outlined"
                             onChange={handleInputChange}
                             required
@@ -172,16 +187,12 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
                         <Table>
                             <TableBody>
                                 <TableRow>
-                                    <TableCell>Maximum borrowing power</TableCell>
-                                    <TableCell>${(userStats.platform.borrowingPower).toFixed(2)}</TableCell>
-                                </TableRow>
-                                <TableRow>
                                     <TableCell>Remaining borrowing power</TableCell>
-                                    <TableCell>${(userStats.platform.borrowingPower - userStats.platform.borrowed).toFixed(2)}</TableCell>
+                                    <TableCell>${userStats ? ((userStats.platform.borrowingPower - userStats.platform.borrowed).toFixed(2)) : "-"}</TableCell>
                                 </TableRow>
                                 <TableRow>
                                     <TableCell>Utilization</TableCell>
-                                    <TableCell>{(userStats.platform.borrowed / userStats.platform.borrowingPower * 100).toFixed(2)}%</TableCell>
+                                    <TableCell>{userStats ? ((userStats.platform.borrowed / userStats.platform.borrowingPower * 100).toFixed(2)) : "-"}%</TableCell>
                                 </TableRow>
                             </TableBody>
                         </Table>

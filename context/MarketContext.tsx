@@ -21,7 +21,7 @@ interface PoolsInterface {
     ltv: number,
 }
 
-interface MarketInterface {
+export interface MarketInterface {
     overview: {
         totalSupply: number,
         totalBorrows: number,
@@ -33,7 +33,7 @@ interface MarketInterface {
 
 export const MarketContext = createContext<MarketInterface | undefined>(undefined);
 
-const getMarketStats: () => Promise<MarketInterface> = async () => {
+export const getMarketStats: () => Promise<MarketInterface> = async () => {
     const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
     const config = await (await fetch("/api/markets")).json();
 

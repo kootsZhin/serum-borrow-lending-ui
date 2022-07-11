@@ -12,15 +12,6 @@ import { getReserves, getObligations } from "../src/utils";
 import { WRAPPED_SOL_MINT } from "../src/constants";
 import { CONTEXT_UPDATE_INTERVAL } from "../src/constants";
 
-interface UserInterface {
-    platform: {
-        deposited: number,
-        borrowed: number,
-        borrowingPower: number,
-    },
-    pools: UserPoolInterface[]
-}
-
 interface UserPoolInterface {
     symbol: string,
     name: string,
@@ -33,9 +24,18 @@ interface UserPoolInterface {
     balanceValue: number,
 }
 
+export interface UserInterface {
+    platform: {
+        deposited: number,
+        borrowed: number,
+        borrowingPower: number,
+    },
+    pools: UserPoolInterface[]
+}
+
 export const UserContext = createContext<UserInterface | undefined>(undefined);
 
-const getUserStats = async (publicKey) => {
+export const getUserStats = async (publicKey) => {
     const connection = new Connection(clusterApiUrl("devnet"));
     const config: Config = await (await fetch("/api/markets")).json();
     const tokensOracle = await getTokensOracleData(connection, config, config.markets[0].reserves);
@@ -99,6 +99,7 @@ const getUserStats = async (publicKey) => {
             deposited: userDepositedValue,
             borrowed: userBorrowedValue,
             borrowingPower: userBorrowingPower,
+            positionsCount: userObligation.data.deposits.length + userObligation.data.borrows.length,
         },
         pools: pools
     }

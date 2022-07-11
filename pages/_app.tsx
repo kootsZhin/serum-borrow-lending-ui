@@ -19,6 +19,7 @@ import { createDefaultAuthorizationResultCache, SolanaMobileWalletAdapter } from
 import { SnackbarProvider } from 'notistack';
 import MarketProvider from '../context/MarketContext';
 import UserProvider from '../context/UserContext';
+import DataProvider from '../context';
 
 // Default styles that can be overridden by your app
 require('@solana/wallet-adapter-react-ui/styles.css');
@@ -60,14 +61,12 @@ function MyApp({ Component, pageProps }: AppProps) {
         <ConnectionProvider endpoint={endpoint}>
             <WalletProvider wallets={wallets} autoConnect>
                 <WalletModalProvider>
-                    <UserProvider>
-                        <MarketProvider>
-                            <SnackbarProvider>
-                                <Header />
-                                <Component {...pageProps} />
-                            </SnackbarProvider>
-                        </MarketProvider>
-                    </UserProvider>
+                    <DataProvider>
+                        <SnackbarProvider>
+                            <Header />
+                            <Component {...pageProps} />
+                        </SnackbarProvider>
+                    </DataProvider>
                 </WalletModalProvider>
             </WalletProvider>
         </ConnectionProvider >

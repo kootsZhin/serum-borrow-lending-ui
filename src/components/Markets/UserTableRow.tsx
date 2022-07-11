@@ -3,10 +3,18 @@ import { findWhere } from "underscore";
 import { TableCell } from "@mui/material"
 
 import { UserContext } from "../../../context/UserContext";
+import { DataContext } from "../../../context";
 
 const UserTableRow = ({ token }: { token: string }) => {
 
-    const userStats = useContext(UserContext);
+    const data = useContext(DataContext);
+
+    let userStats;
+    try {
+        userStats = data.user;
+    } catch (e) {
+        userStats = undefined;
+    }
 
     let userPoolStats;
     try {

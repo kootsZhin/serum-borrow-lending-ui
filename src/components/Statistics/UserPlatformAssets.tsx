@@ -2,13 +2,21 @@ import { Card, Grid, Typography } from '@mui/material'
 import { useContext } from 'react';
 
 import { UserContext } from '../../../context/UserContext';
+import { DataContext } from '../../../context';
 
 const UserPlatformAssets = () => {
 
-    const userStats = useContext(UserContext);
+    const data = useContext(DataContext);
+
+    let userStats;
+    try {
+        userStats = data.user;
+    } catch (e) {
+        userStats = undefined;
+    }
 
     return (
-        <Card>
+        <Card sx={{ width: '100%', overflow: 'hidden' }}>
             <Grid container spacing={1} padding={2}>
                 <Grid item xs={12}>
                     <Typography variant='h6'>
