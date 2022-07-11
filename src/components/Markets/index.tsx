@@ -89,7 +89,7 @@ export default function Markets() {
         <Paper sx={{ width: '100%', overflow: 'hidden' }}>
             <TableContainer sx={{ maxHeight: "70vh" }}>
                 <Table stickyHeader aria-label="sticky table">
-                    <caption>Nest update in: {nextUpdate} second(s)</caption>
+                    <caption>Next update in: {nextUpdate} second(s)</caption>
                     <TableHead>
                         <TableRow>
                             {columns.map((column) => (
