@@ -10,6 +10,7 @@ import { Config } from "../src/global";
 import { getTokensOracleData } from "../src/pyth";
 import { getReserves, getObligations } from "../src/utils";
 import { WRAPPED_SOL_MINT } from "../src/constants";
+import { CONTEXT_UPDATE_INTERVAL } from "../src/constants";
 
 interface UserInterface {
     platform: {
@@ -103,7 +104,7 @@ export default function UserProvider({ children }) {
 
     useEffect(() => {
         fetchUserStats();
-        const interval = setInterval(fetchUserStats, 5000);
+        const interval = setInterval(fetchUserStats, CONTEXT_UPDATE_INTERVAL);
 
         return () => clearInterval(interval);
     }, [publicKey]);

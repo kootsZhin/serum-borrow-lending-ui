@@ -4,6 +4,7 @@ import { findWhere, find } from "underscore";
 
 import { getTokensOracleData } from "../src/pyth";
 import { getReserves } from "../src/utils";
+import { CONTEXT_UPDATE_INTERVAL } from "../src/constants";
 
 interface PoolsInterface {
     symbol: string,
@@ -115,7 +116,7 @@ export default function MarketProvider({ children }) {
 
     useEffect(() => {
         fetchMarketStats();
-        const interval = setInterval(fetchMarketStats, 5000);
+        const interval = setInterval(fetchMarketStats, CONTEXT_UPDATE_INTERVAL);
 
         return () => clearInterval(interval);
     }, []);

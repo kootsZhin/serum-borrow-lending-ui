@@ -10,6 +10,8 @@ import { useState, useEffect } from 'react'
 import MarketTableRow from './MarketTableRow';
 import UserTableRow from './UserTableRow';
 import ActionsPanel from './ActionPanel';
+import { TableFooter, Typography } from '@mui/material';
+import { CONTEXT_UPDATE_INTERVAL } from '../../constants';
 
 interface Column {
     id: string;
@@ -68,6 +70,7 @@ export default function Markets() {
         <Paper sx={{ width: '100%', overflow: 'hidden' }}>
             <TableContainer sx={{ maxHeight: "70vh" }}>
                 <Table stickyHeader aria-label="sticky table">
+                    <caption>Data fetching interval: {CONTEXT_UPDATE_INTERVAL / 1000} second(s)</caption>
                     <TableHead>
                         <TableRow>
                             {columns.map((column) => (
