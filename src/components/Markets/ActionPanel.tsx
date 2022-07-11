@@ -106,7 +106,7 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
                 max = Math.min(userPoolStats.deposited, userStats.platform.remainingBorrowingPower / poolStats.ltv / userPoolStats.price);
                 break;
             case 3:
-                max = userStats.platform.remainingBorrowingPower / poolStats.price;
+                max = Math.min(userStats.platform.remainingBorrowingPower / poolStats.price, poolStats.totalAvailable);
                 break;
             default:
                 break
