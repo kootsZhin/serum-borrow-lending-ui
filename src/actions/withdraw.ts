@@ -4,8 +4,8 @@ import { PublicKey } from "@solana/web3.js";
 import { findWhere, find } from "underscore";
 import { BigNumber } from "bignumber.js";
 
-import { refreshReserveInstruction, refreshObligationInstruction, withdrawObligationCollateralAndRedeemReserveLiquidity } from "../models/instructions";
-import { getObligations, getReserves } from "../utils";
+import { refreshObligationInstruction, withdrawObligationCollateralAndRedeemReserveLiquidity } from "../models/instructions";
+import { getObligations, getReserves, pushIfNotExists } from "../utils";
 import { refreshReserves } from "./refreshReserves";
 import { Config } from "../global";
 import { wrapSol } from './wrapSol';
@@ -29,12 +29,23 @@ export const withdraw = async (connection: Connection, publicKey: PublicKey, ass
     const allObligation = await getObligations(connection, config, config.markets[0].address);
     const userObligation = find(allObligation, (r) => r!.data.owner.toString() === publicKey.toString());
 
+    let reservesToBeRefreshed: PublicKey[] = [];
     let userDepositedReserves: PublicKey[] = [];
     let userBorrowedReserves: PublicKey[] = [];
     if (userObligation) {
-        userObligation.data.deposits.forEach((deposit) => { userDepositedReserves.push(deposit.depositReserve) });
-        userObligation.data.borrows.forEach((borrow) => { userBorrowedReserves.push(borrow.borrowReserve) });
+        userObligation.data.deposits.forEach((deposit) => {
+            userDepositedReserves.push(deposit.depositReserve);
+            pushIfNotExists(reservesToBeRefreshed, deposit.depositReserve);
+        });
+        userObligation.data.borrows.forEach((borrow) => {
+            userBorrowedReserves.push(borrow.borrowReserve);
+            pushIfNotExists(reservesToBeRefreshed, borrow.borrowReserve);
+        });
     }
+
+    pushIfNotExists(reservesToBeRefreshed, new PublicKey(reserveConfig.address));
+
+    refreshReserves(instructions, reservesToBeRefreshed, config);
 
     const userCollateralAccount = await getAssociatedTokenAddress(new PublicKey(reserveConfig.collateralMintAddress), publicKey);
     const userLiquidityAccount = signers ? signers[0].publicKey : await getAssociatedTokenAddress(new PublicKey(assetConfig.mintAddress), publicKey);
@@ -47,14 +58,6 @@ export const withdraw = async (connection: Connection, publicKey: PublicKey, ass
         new PublicKey(config.programID)
     );
 
-    instructions.push(refreshReserveInstruction(
-        new PublicKey(reserveConfig.address),
-        new PublicKey(config.programID),
-        new PublicKey(oracleConfig.priceAddress)
-    ))
-
-    refreshReserves(instructions, userDepositedReserves, config);
-    refreshReserves(instructions, userBorrowedReserves, config);
     instructions.push(refreshObligationInstruction(
         userObligation.pubkey,
         new PublicKey(config.programID),

@@ -3,8 +3,8 @@ import { Connection } from '@solana/web3.js';
 import { PublicKey } from "@solana/web3.js";
 import { findWhere, find } from "underscore";
 
-import { refreshReserveInstruction, refreshObligationInstruction, repayObligationLiquidityInstruction } from "../models/instructions";
-import { getObligations } from "../utils";
+import { refreshObligationInstruction, repayObligationLiquidityInstruction } from "../models/instructions";
+import { getObligations, pushIfNotExists } from "../utils";
 import { Config } from '../global';
 import { refreshReserves } from "./refreshReserves";
 import { wrapSol } from "./wrapSol";
@@ -30,21 +30,24 @@ export const repay = async (connection: Connection, publicKey: PublicKey, asset:
     const allObligation = await getObligations(connection, config, config.markets[0].address);
     const userObligation = find(allObligation, (r) => r!.data.owner.toString() === publicKey.toString());
 
+    let reservesToBeRefreshed: PublicKey[] = [];
     let userDepositedReserves: PublicKey[] = [];
     let userBorrowedReserves: PublicKey[] = [];
     if (userObligation) {
-        userObligation.data.deposits.forEach((deposit) => { userDepositedReserves.push(deposit.depositReserve) });
-        userObligation.data.borrows.forEach((borrow) => { userBorrowedReserves.push(borrow.borrowReserve) });
+        userObligation.data.deposits.forEach((deposit) => {
+            userDepositedReserves.push(deposit.depositReserve);
+            pushIfNotExists(reservesToBeRefreshed, deposit.depositReserve);
+        });
+        userObligation.data.borrows.forEach((borrow) => {
+            userBorrowedReserves.push(borrow.borrowReserve);
+            pushIfNotExists(reservesToBeRefreshed, borrow.borrowReserve);
+        });
     }
 
-    instructions.push(refreshReserveInstruction(
-        new PublicKey(reserveConfig.address),
-        new PublicKey(config.programID),
-        new PublicKey(oracleConfig.priceAddress)
-    ))
+    pushIfNotExists(reservesToBeRefreshed, new PublicKey(reserveConfig.address));
 
-    refreshReserves(instructions, userDepositedReserves, config);
-    refreshReserves(instructions, userBorrowedReserves, config);
+    refreshReserves(instructions, reservesToBeRefreshed, config);
+
     instructions.push(refreshObligationInstruction(
         userObligation.pubkey,
         new PublicKey(config.programID),

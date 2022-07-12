@@ -42,3 +42,8 @@ export async function getObligations(connection: Connection, config: Config, len
     return resp.map((account) => parseObligation(account.pubkey, account.account));
 }
 
+export function pushIfNotExists(array: any[], item: any) {
+    if (array.indexOf(item) === -1) {
+        array.push(item);
+    }
+}
