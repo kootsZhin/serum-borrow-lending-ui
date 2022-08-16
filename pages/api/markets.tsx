@@ -13,8 +13,8 @@ export default function handler(
                 {
                     "name": "Bitcon",
                     "symbol": "BTC",
-                    "decimals": Number(`${process.env.NEXT_PUBLIC_USDC_DECIMAL}`),
-                    "mintAddress": `${process.env.NEXT_PUBLIC_USDC_ADDR}`,
+                    "decimals": Number(`${process.env.NEXT_PUBLIC_BTC_DECIMAL}`),
+                    "mintAddress": `${process.env.NEXT_PUBLIC_BTC_ADDR}`,
                 },
                 {
                     "name": "Wrapped SOL",
@@ -30,11 +30,11 @@ export default function handler(
                     "reserves": [
                         {
                             "asset": "BTC",
-                            "address": `${process.env.NEXT_PUBLIC_USDC_RESERVE_ADDR}`,
-                            "collateralMintAddress": `${process.env.NEXT_PUBLIC_USDC_COLLATERAL_MINT_ADDR}`,
-                            "collateralSupplyAddress": `${process.env.NEXT_PUBLIC_USDC_COLLATERAL_SUPPLY_ADDR}`,
-                            "liquidityAddress": `${process.env.NEXT_PUBLIC_USDC_RESERVE_LIQUIDITY_ADDR}`,
-                            "liquidityFeeReceiverAddress": `${process.env.NEXT_PUBLIC_USDC_RESERVE_LIQUIDITY_FEE_RECEIVER_ADDR}`
+                            "address": `${process.env.NEXT_PUBLIC_BTC_RESERVE_ADDR}`,
+                            "collateralMintAddress": `${process.env.NEXT_PUBLIC_BTC_COLLATERAL_MINT_ADDR}`,
+                            "collateralSupplyAddress": `${process.env.NEXT_PUBLIC_BTC_COLLATERAL_SUPPLY_ADDR}`,
+                            "liquidityAddress": `${process.env.NEXT_PUBLIC_BTC_RESERVE_LIQUIDITY_ADDR}`,
+                            "liquidityFeeReceiverAddress": `${process.env.NEXT_PUBLIC_BTC_RESERVE_LIQUIDITY_FEE_RECEIVER_ADDR}`
                         },
                         {
                             "asset": "SOL",

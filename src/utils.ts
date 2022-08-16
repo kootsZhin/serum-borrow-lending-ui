@@ -1,6 +1,6 @@
 import { Connection, PublicKey } from "@solana/web3.js";
 import { Config } from "./global";
-import { parseObligation, parseReserve, RESERVE_SIZE, OBLIGATION_SIZE } from "./models";
+import { OBLIGATION_SIZE, parseObligation, parseReserve, RESERVE_SIZE } from "./models";
 
 export async function getReserves(connection: Connection, config: Config, lendingMarket: any) {
     const resp = await connection.getProgramAccounts(new PublicKey(config.programID), {

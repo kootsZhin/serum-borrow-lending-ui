@@ -1,10 +1,9 @@
-import { Connection, clusterApiUrl } from "@solana/web3.js";
-import { createContext, useState, useEffect } from "react";
-import { findWhere, find } from "underscore";
+import { clusterApiUrl, Connection } from "@solana/web3.js";
+import { createContext } from "react";
+import { find, findWhere } from "underscore";
 
 import { getTokensOracleData } from "../src/pyth";
 import { getReserves } from "../src/utils";
-import { CONTEXT_UPDATE_INTERVAL } from "../src/constants";
 
 interface PoolsInterface {
     symbol: string,
