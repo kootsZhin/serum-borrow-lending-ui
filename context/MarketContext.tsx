@@ -15,8 +15,8 @@ interface PoolsInterface {
     totalBorrowValue: number,
     totalAvailable: number,
     totalAvailableValue: number,
-    depositAPR: number,
-    borrowAPR: number,
+    depositAPY: number,
+    borrowAPY: number,
     ltv: number,
 }
 
@@ -57,24 +57,24 @@ export const getMarketStats: () => Promise<MarketInterface> = async () => {
         const currentUtilization = (totalBorrow ? totalBorrow / totalDeposit : 0)
         const optimalUtilization = (reserveConfig.config.optimalUtilizationRate / 100)
 
-        let borrowAPR = 0;
+        let borrowAPY = 0;
         if (optimalUtilization === 1.0 || currentUtilization < optimalUtilization) {
             const normalizedFactor = currentUtilization / optimalUtilization;
             const optimalBorrowRate = reserveConfig.config.optimalBorrowRate / 100;
             const minBorrowRate = reserveConfig.config.minBorrowRate / 100;
-            borrowAPR =
+            borrowAPY =
                 normalizedFactor * (optimalBorrowRate - minBorrowRate) + minBorrowRate;
         } else {
             const normalizedFactor =
                 (currentUtilization - optimalUtilization) / (1 - optimalUtilization);
             const optimalBorrowRate = reserveConfig.config.optimalBorrowRate / 100;
             const maxBorrowRate = reserveConfig.config.maxBorrowRate / 100;
-            borrowAPR =
+            borrowAPY =
                 normalizedFactor * (maxBorrowRate - optimalBorrowRate) +
                 optimalBorrowRate;
         }
 
-        const depositAPR = borrowAPR * currentUtilization;
+        const depositAPY = borrowAPY * currentUtilization;
 
         const loanToValue = reserveConfig.config.loanToValueRatio / 100;
 
@@ -88,8 +88,8 @@ export const getMarketStats: () => Promise<MarketInterface> = async () => {
             totalBorrowValue: totalBorrow * tokenOracle.price,
             totalAvailable: totalAvailable,
             totalAvailableValue: totalAvailable * tokenOracle.price,
-            depositAPR: depositAPR,
-            borrowAPR: borrowAPR,
+            depositAPY: depositAPY,
+            borrowAPY: borrowAPY,
             ltv: loanToValue,
         })
 

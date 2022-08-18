@@ -1,4 +1,3 @@
-import * as React from 'react';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -6,13 +5,12 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import { useState, useEffect, useContext } from 'react'
+import { useContext, useEffect, useState } from 'react';
+import { DataContext } from '../../../context';
+import { CONTEXT_UPDATE_INTERVAL } from '../../constants';
+import ActionsPanel from './ActionPanel';
 import MarketTableRow from './MarketTableRow';
 import UserTableRow from './UserTableRow';
-import ActionsPanel from './ActionPanel';
-import { TableFooter, Typography } from '@mui/material';
-import { CONTEXT_UPDATE_INTERVAL } from '../../constants';
-import { DataContext } from '../../../context';
 
 interface Column {
     id: string;
@@ -27,8 +25,8 @@ const columns: readonly Column[] = [
     { id: "totalDeposit", label: "Total Deposit" },
     { id: "totalBorrow", label: "Total Borrow" },
     { id: "totalAvailable", label: "Total Available" },
-    { id: "depositAPR", label: "Deposit APR" },
-    { id: "borrowAPR", label: "Borrow APR" },
+    { id: "depositAPY", label: "Deposit APY" },
+    { id: "borrowAPY", label: "Borrow APY" },
     { id: "loanToValue", label: "LTV", format: (value) => `${value}%` },
 
     { id: "userDeposit", label: "My Deposited" },
