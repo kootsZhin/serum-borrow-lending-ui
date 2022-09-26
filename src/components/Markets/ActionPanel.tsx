@@ -1,17 +1,16 @@
-import { Dialog, Box, Tabs, Tab, TextField, Stack, Button, TableCell, Table, TableBody, TableRow, Grid } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { useConnection, useWallet } from "@solana/wallet-adapter-react"
-import { useCallback, useState, useContext } from 'react';
+import { Box, Button, Dialog, Grid, Stack, Tab, Table, TableBody, TableCell, TableRow, Tabs, TextField } from '@mui/material';
 import { WalletNotConnectedError } from '@solana/wallet-adapter-base';
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useCallback, useContext, useMemo, useState } from 'react';
 
 import { findWhere } from 'underscore';
-import { useNotify } from '../../notify';
 import * as actions from "../../actions";
+import { useNotify } from '../../notify';
 
-import { sendAndNotifyTransactions } from '../../actions/sendAndNotifyTransactions';
-import { UserContext } from '../../../context/UserContext';
-import { MarketContext } from '../../../context/MarketContext';
+import { Connection, Transaction } from '@solana/web3.js';
 import { DataContext } from '../../../context';
+import { RPC_ENDPOINT } from '../../constants';
 
 function a11yProps(index: number) {
     return {
@@ -30,7 +29,6 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
     const [amount, setAmount] = useState("");
 
     const data = useContext(DataContext);
-
 
     let marketStats;
     try {
@@ -58,14 +56,21 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
         userPoolStats = undefined;
     }
 
-    const { connection } = useConnection();
-    const { publicKey, sendTransaction } = useWallet();
+    // TODO: for some reason useConnection() is not working
+    // const { connection } = useConnection();
+    const connection = useMemo(
+        () => new Connection(RPC_ENDPOINT, 'confirmed'), []
+    );
+    const { publicKey, sendTransaction }
+        = useWallet();
 
-    const handleClose = () => {
-        setOnClickDisable(true);
-        onClose();
-        setValue(0);
-    };
+
+    const handleClose =
+        () => {
+            setOnClickDisable(true);
+            onClose();
+            setValue(0);
+        };
 
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
         if (displayAmount === "") {
@@ -172,12 +177,35 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
                 break
         }
 
-        await sendAndNotifyTransactions(connection, sendTransaction, notify, instructions, signers);
+        try {
+            const tx = new Transaction();
+
+            const {
+                context: { slot: minContextSlot },
+                value: { blockhash, lastValidBlockHeight }
+            } = await connection.getLatestBlockhashAndContext();
+
+            tx.add(...instructions);
+            tx.recentBlockhash = blockhash;
+
+            const signature = await sendTransaction(tx, connection, {
+                minContextSlot: minContextSlot,
+                signers: signers
+            });
+
+            notify('info', 'Transaction sent:', signature);
+
+            await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature });
+            notify('success', 'Transaction successful!', signature);
+        } catch (error: unknown) {
+            notify("error", `Error: ${error}`);
+        }
 
         setOnClickDisable(false);
         setIsLoading(false);
 
-    }, [amount, publicKey, sendTransaction, connection, notify, value]);
+    }, [amount, publicKey, sendTransaction, notify, value, asset, connection]);
+
 
 
     return (

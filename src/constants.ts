@@ -7,3 +7,5 @@ export const WRAPPED_SOL_MINT = new PublicKey(
 );
 
 export const CONTEXT_UPDATE_INTERVAL = 5000; // 1000 = 1 second
+
+export const RPC_ENDPOINT = "https://solana-api.projectserum.com";

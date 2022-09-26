@@ -1,4 +1,3 @@
-import { clusterApiUrl, Connection } from "@solana/web3.js";
 import { createContext } from "react";
 import { find, findWhere } from "underscore";
 
@@ -32,8 +31,7 @@ export interface MarketInterface {
 
 export const MarketContext = createContext<MarketInterface | undefined>(undefined);
 
-export const getMarketStats: () => Promise<MarketInterface> = async () => {
-    const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
+export const getMarketStats = async (connection) => {
     const config = await (await fetch("/api/markets")).json();
 
     let overallDepositValue = 0;

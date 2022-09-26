@@ -12,9 +12,9 @@ export default function handler(
             "assets": [
                 {
                     "name": "Bitcon",
-                    "symbol": "BTC",
-                    "decimals": Number(`${process.env.NEXT_PUBLIC_BTC_DECIMAL}`),
-                    "mintAddress": `${process.env.NEXT_PUBLIC_BTC_ADDR}`,
+                    "symbol": "USDC",
+                    "decimals": Number(`${process.env.NEXT_PUBLIC_USDC_DECIMAL}`),
+                    "mintAddress": `${process.env.NEXT_PUBLIC_USDC_ADDR}`,
                 },
                 {
                     "name": "Wrapped SOL",
@@ -29,12 +29,12 @@ export default function handler(
                     "address": `${process.env.NEXT_PUBLIC_MARKET_ADDR}`,
                     "reserves": [
                         {
-                            "asset": "BTC",
-                            "address": `${process.env.NEXT_PUBLIC_BTC_RESERVE_ADDR}`,
-                            "collateralMintAddress": `${process.env.NEXT_PUBLIC_BTC_COLLATERAL_MINT_ADDR}`,
-                            "collateralSupplyAddress": `${process.env.NEXT_PUBLIC_BTC_COLLATERAL_SUPPLY_ADDR}`,
-                            "liquidityAddress": `${process.env.NEXT_PUBLIC_BTC_RESERVE_LIQUIDITY_ADDR}`,
-                            "liquidityFeeReceiverAddress": `${process.env.NEXT_PUBLIC_BTC_RESERVE_LIQUIDITY_FEE_RECEIVER_ADDR}`
+                            "asset": "USDC",
+                            "address": `${process.env.NEXT_PUBLIC_USDC_RESERVE_ADDR}`,
+                            "collateralMintAddress": `${process.env.NEXT_PUBLIC_USDC_COLLATERAL_MINT_ADDR}`,
+                            "collateralSupplyAddress": `${process.env.NEXT_PUBLIC_USDC_COLLATERAL_SUPPLY_ADDR}`,
+                            "liquidityAddress": `${process.env.NEXT_PUBLIC_USDC_RESERVE_LIQUIDITY_ADDR}`,
+                            "liquidityFeeReceiverAddress": `${process.env.NEXT_PUBLIC_USDC_RESERVE_LIQUIDITY_FEE_RECEIVER_ADDR}`
                         },
                         {
                             "asset": "SOL",
@@ -48,15 +48,15 @@ export default function handler(
                 }
             ],
             "oracles": {
-                "pythProgramID": "gSbePebfvPy7tRqimPoVecS2UsBvYv46ynrzWocc92s",
+                "pythProgramID": "FsJ3A3u2vn5cTVofAjvy6y5kwABJAqYWpe4975bi2epH",
                 "assets": [
                     {
-                        "asset": "BTC",
-                        "priceAddress": "HovQMDrbAgAYPCmHVSrezcSmkMtXSSUsLDFANExrZh2J" // 5SSkXsEKQepHHAewytPVwdej4epN1nxgLVM84L4KXgy7 using BTC oracle for better stability
+                        "asset": "USDC",
+                        "priceAddress": "GVXRSBjFk6e6J3NbVPXohDJetcTjaeeuykUpbQF8UoMU" // 5SSkXsEKQepHHAewytPVwdej4epN1nxgLVM84L4KXgy7 using USDC oracle for better stability
                     },
                     {
                         "asset": "SOL",
-                        "priceAddress": "J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix"
+                        "priceAddress": "H6ARHf6YXhGYeQfUzQNGk6rDNnLBQKrenN712K4AQJEG"
                     }
                 ]
             }

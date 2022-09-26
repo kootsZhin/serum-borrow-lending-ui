@@ -1,10 +1,10 @@
-import { createContext, useState, useEffect } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { createContext, useEffect, useState } from "react";
 
-import { UserInterface, getUserStats } from "./UserContext";
-import { MarketInterface, getMarketStats } from "./MarketContext";
-import { CONTEXT_UPDATE_INTERVAL } from "../src/constants";
-import { PublicKey } from "@solana/web3.js";
+import { Connection, PublicKey } from "@solana/web3.js";
+import { CONTEXT_UPDATE_INTERVAL, RPC_ENDPOINT } from "../src/constants";
+import { getMarketStats, MarketInterface } from "./MarketContext";
+import { getUserStats, UserInterface } from "./UserContext";
 
 interface DataInterface {
     market: MarketInterface;
@@ -13,12 +13,14 @@ interface DataInterface {
 
 export const DataContext = createContext<DataInterface | undefined>(undefined);
 
-const getData: (PublicKey) => Promise<DataInterface> = async (publicKey: PublicKey) => {
-    const market = await getMarketStats();
+const getData = async (connection: Connection, publicKey: PublicKey) => {
+    console.log('getData()');
+
+    const market = await getMarketStats(connection);
 
     let user;
     if (publicKey) {
-        user = await getUserStats(publicKey);
+        user = await getUserStats(connection, publicKey);
     } else {
         user = undefined;
     }
@@ -28,6 +30,7 @@ const getData: (PublicKey) => Promise<DataInterface> = async (publicKey: PublicK
 
 export default function DataProvider({ children }) {
     const [data, setData] = useState(undefined);
+    const connection = new Connection(RPC_ENDPOINT);
 
     const { publicKey } = useWallet();
 
@@ -39,7 +42,7 @@ export default function DataProvider({ children }) {
     }, [publicKey]);
 
     const fetchData = async () => {
-        const data = await getData(publicKey);
+        const data = await getData(connection, publicKey);
         setData(data);
     }
 
