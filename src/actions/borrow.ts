@@ -67,7 +67,6 @@ export const borrow = async (connection: Connection, publicKey: PublicKey, asset
         [new PublicKey(config.markets[0].address).toBuffer()],
         new PublicKey(config.programID)
     );
-    console.log(authority.toString());
 
     instructions.push(refreshObligationInstruction(
         userObligation.pubkey,

@@ -11,7 +11,7 @@ export default function handler(
             "programID": `${process.env.NEXT_PUBLIC_PROGRAM_ID}`,
             "assets": [
                 {
-                    "name": "Bitcon",
+                    "name": "USD Coin",
                     "symbol": "USDC",
                     "decimals": Number(`${process.env.NEXT_PUBLIC_USDC_DECIMAL}`),
                     "mintAddress": `${process.env.NEXT_PUBLIC_USDC_ADDR}`,
@@ -53,7 +53,7 @@ export default function handler(
                 "assets": [
                     {
                         "asset": "USDC",
-                        "priceAddress": "GVXRSBjFk6e6J3NbVPXohDJetcTjaeeuykUpbQF8UoMU" // 5SSkXsEKQepHHAewytPVwdej4epN1nxgLVM84L4KXgy7 using USDC oracle for better stability
+                        "priceAddress": "Gnt27xtC473ZT2Mw5u8wZ68Z3gULkSTb5DuxJy7eJotD"
                     },
                     {
                         "asset": "SOL",
