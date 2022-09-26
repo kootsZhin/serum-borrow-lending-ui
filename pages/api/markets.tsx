@@ -27,6 +27,7 @@ export default function handler(
                 {
                     "name": "main",
                     "address": `${process.env.NEXT_PUBLIC_MARKET_ADDR}`,
+                    "authority": `${process.env.NEXT_PUBLIC_MARKET_AUTHORITY}`,
                     "reserves": [
                         {
                             "asset": "USDC",

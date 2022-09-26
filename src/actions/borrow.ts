@@ -1,18 +1,15 @@
-import { Connection } from '@solana/web3.js';
-import { PublicKey } from "@solana/web3.js";
-import { findWhere, find } from 'underscore';
 import {
-    getAssociatedTokenAddress,
     createAssociatedTokenAccountInstruction,
     createCloseAccountInstruction,
-    getAccount,
-    TokenAccountNotFoundError,
+    getAccount, getAssociatedTokenAddress, TokenAccountNotFoundError,
     TokenInvalidAccountOwnerError
 } from '@solana/spl-token';
+import { Connection, PublicKey } from '@solana/web3.js';
+import { find, findWhere } from 'underscore';
 
-import { refreshObligationInstruction, borrowObligationLiquidityInstruction } from '../models/instructions';
-import { getObligations, pushIfNotExists } from '../utils';
 import { Config } from '../global';
+import { borrowObligationLiquidityInstruction, refreshObligationInstruction } from '../models/instructions';
+import { getObligations, pushIfNotExists } from '../utils';
 import { refreshReserves } from './refreshReserves';
 import { wrapSol } from './wrapSol';
 
@@ -70,6 +67,7 @@ export const borrow = async (connection: Connection, publicKey: PublicKey, asset
         [new PublicKey(config.markets[0].address).toBuffer()],
         new PublicKey(config.programID)
     );
+    console.log(authority.toString());
 
     instructions.push(refreshObligationInstruction(
         userObligation.pubkey,

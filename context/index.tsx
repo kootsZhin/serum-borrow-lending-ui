@@ -14,8 +14,6 @@ interface DataInterface {
 export const DataContext = createContext<DataInterface | undefined>(undefined);
 
 const getData = async (connection: Connection, publicKey: PublicKey) => {
-    console.log('getData()');
-
     const market = await getMarketStats(connection);
 
     let user;

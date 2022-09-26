@@ -72,11 +72,6 @@ export const getUserStats = async (connection, publicKey) => {
             tokenAssetsBalance = Number((await connection.getBalance(publicKey)).toString()) / LAMPORTS_PER_SOL;
         }
 
-        console.log(userObligation);
-        console.log(userDepositedToken);
-        console.log(userDepositedTokenBalance);
-        console.log(tokenAssetsBalance);
-
         userDepositedValue += userDepositedTokenBalanceValue;
         userBorrowedValue += userBorrowedTokenBalanceValue;
 
