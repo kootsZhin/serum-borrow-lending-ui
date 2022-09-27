@@ -1,13 +1,12 @@
-import { getAssociatedTokenAddress, createCloseAccountInstruction } from "@solana/spl-token";
-import { Connection } from '@solana/web3.js';
-import { PublicKey } from "@solana/web3.js";
-import { findWhere, find } from "underscore";
+import { createCloseAccountInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
+import { Connection, PublicKey } from '@solana/web3.js';
 import { BigNumber } from "bignumber.js";
+import { find, findWhere } from "underscore";
 
-import { refreshObligationInstruction, withdrawObligationCollateralAndRedeemReserveLiquidity } from "../models/instructions";
+import { Config } from "../global";
+import { refreshObligationInstruction, withdrawObligationCollateralAndRedeemReserveLiquidityInstruction } from "../models/instructions";
 import { getObligations, getReserves, pushIfNotExists } from "../utils";
 import { refreshReserves } from "./refreshReserves";
-import { Config } from "../global";
 import { wrapSol } from './wrapSol';
 
 export const withdraw = async (connection: Connection, publicKey: PublicKey, asset: string, withdrawAmount: number) => {
@@ -73,7 +72,7 @@ export const withdraw = async (connection: Connection, publicKey: PublicKey, ass
         .dividedBy(cTokenExchangeRate)
         .integerValue(BigNumber.ROUND_FLOOR).toString())
 
-    instructions.push(withdrawObligationCollateralAndRedeemReserveLiquidity(
+    instructions.push(withdrawObligationCollateralAndRedeemReserveLiquidityInstruction(
         withdrawCollateralAmount,
         new PublicKey(config.programID),
         new PublicKey(reserveConfig.collateralSupplyAddress),

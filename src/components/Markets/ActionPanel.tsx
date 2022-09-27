@@ -1,5 +1,5 @@
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Box, Button, Dialog, Grid, Stack, Tab, Table, TableBody, TableCell, TableRow, Tabs, TextField } from '@mui/material';
+import { Box, Button, Dialog, Grid, Stack, Tab, Table, TableBody, TableCell, TableRow, Tabs, TextField, Typography } from '@mui/material';
 import { WalletNotConnectedError } from '@solana/wallet-adapter-base';
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useCallback, useContext, useMemo, useState } from 'react';
@@ -239,10 +239,10 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
                         />
                         <Grid container spacing={0}>
                             <Grid item xs={6}>
-                                <Button disabled={!publicKey} sx={{ width: '100%', overflow: 'hidden' }} variant="outlined" onClick={useMax}>max</Button>
+                                <Button disabled={!publicKey} sx={{ width: '100%', overflow: 'hidden' }} variant="outlined" onClick={useMax}>Max</Button>
                             </Grid>
                             <Grid item xs={6}>
-                                <Button disabled={!publicKey} sx={{ width: '100%', overflow: 'hidden' }} variant="outlined" onClick={useHalfMax}>50% max</Button>
+                                <Button disabled={!publicKey} sx={{ width: '100%', overflow: 'hidden' }} variant="outlined" onClick={useHalfMax}>Half</Button>
                             </Grid>
                         </Grid>
                         <Table>
@@ -257,6 +257,7 @@ export default function ActionsPanel(props: { open: boolean, asset: string, onCl
                                 </TableRow>
                             </TableBody>
                         </Table>
+                        <Typography variant='caption'>(*keep some dust when using max if error occurs)</Typography>
                         <LoadingButton
                             disabled={!publicKey || onClickDisable}
                             loading={isLoading}

@@ -1,7 +1,7 @@
-import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
-import { PublicKey, SYSVAR_CLOCK_PUBKEY, TransactionInstruction } from '@solana/web3.js';
 import { struct, u8 } from '@solana/buffer-layout';
 import { u64 } from '@solana/buffer-layout-utils';
+import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { PublicKey, SYSVAR_CLOCK_PUBKEY, TransactionInstruction } from '@solana/web3.js';
 import { LendingInstruction } from './instruction';
 
 interface Data {
@@ -11,7 +11,7 @@ interface Data {
 
 const DataLayout = struct<Data>([u8('instruction'), u64('collateralAmount')]);
 
-export const withdrawObligationCollateralAndRedeemReserveLiquidity = (
+export const withdrawObligationCollateralAndRedeemReserveLiquidityInstruction = (
     collateralAmount: number | bigint,
     lendingProgramID: PublicKey,
     sourceCollateral: PublicKey,

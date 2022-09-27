@@ -1,3 +1,7 @@
+# Serum Borrow Lending UI
+
+A minimum implementation of an [interactive UI](https://serum-borrow-lending.vercel.app/) for the [Serum Borrow Lending](https://github.com/kootsZhin/serum-borrow-lending) program.
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
